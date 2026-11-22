@@ -1,0 +1,3579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#050a13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050a13'/%3E%3Ccircle cx='34' cy='26' r='13' fill='%232fe0c0'/%3E%3Crect x='27' y='36' width='7' height='18' rx='3' fill='%23ffb454' transform='rotate(18 30 45)'/%3E%3Ccircle cx='22' cy='22' r='4' fill='%23fff'/%3E%3C/svg%3E">
+<title>弧光乒乓 · 俱乐部物语</title>
+<style>
+:root {
+  --bg: #050a13;
+  --bg2: #081426;
+  --panel: rgba(17, 29, 47, .82);
+  --panel2: rgba(25, 40, 64, .7);
+  --line: rgba(133, 172, 232, .14);
+  --line2: rgba(133, 172, 232, .26);
+  --text: #eaf3ff;
+  --muted: #8ea5c6;
+  --teal: #2fe0c0;
+  --teal-dim: #139c8a;
+  --orange: #ffb454;
+  --red: #ff6174;
+  --green: #4ee39a;
+  --blue: #6ea8ff;
+  --shadow: 0 14px 36px rgba(0, 0, 0, .38);
+  --r: 16px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(900px 500px at 15% -10%, rgba(36, 93, 160, .28), transparent 60%),
+    radial-gradient(700px 400px at 110% 10%, rgba(20, 130, 120, .16), transparent 55%),
+    #03060c;
+  color: var(--text);
+  font-family: system-ui, -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { cursor: default; }
+.hidden { display: none !important; }
+.mono { font-family: ui-monospace, "SF Mono", "Roboto Mono", monospace; font-variant-numeric: tabular-nums; }
+
+#app {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+  background:
+    radial-gradient(600px 300px at 50% -5%, rgba(47, 224, 192, .08), transparent 65%),
+    linear-gradient(180deg, #071120 0%, #050a13 45%, #04080f 100%);
+}
+
+@media (min-width: 600px) {
+  body { padding: 18px 0; align-items: flex-start; }
+  .tabbar { bottom: 18px; border-radius: 0 0 26px 26px; }
+  .start-bar { bottom: 18px; }
+  #app {
+    min-height: calc(100dvh - 36px);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .65);
+  }
+}
+
+/* ---------- 通用 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 13px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .02em;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  transition: transform .12s ease, filter .12s ease, background .12s ease;
+}
+.btn:active { transform: scale(.975); }
+.btn-primary {
+  color: #03211c;
+  background: linear-gradient(135deg, #5ff3d5, #23c9ad);
+  border-color: transparent;
+  box-shadow: 0 8px 22px rgba(35, 201, 173, .3);
+}
+.btn-primary:disabled { filter: grayscale(.7) brightness(.6); box-shadow: none; }
+.btn-ghost { background: rgba(255, 255, 255, .04); }
+.btn-warn { color: #221306; background: linear-gradient(135deg, #ffd08a, #ffb454); border-color: transparent; }
+.btn-block { width: 100%; }
+.btn-sm { min-height: 38px; padding: 0 13px; font-size: 13px; border-radius: 11px; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 22px 2px 10px;
+}
+.section-head h2 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: .06em;
+}
+.section-head small { color: var(--muted); font-size: 11px; letter-spacing: .04em; }
+.muted { color: var(--muted); }
+.tiny { font-size: 11px; line-height: 1.5; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .04);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.chip.on { color: var(--teal); border-color: rgba(47, 224, 192, .4); background: rgba(47, 224, 192, .09); }
+.chip.gold { color: var(--orange); border-color: rgba(255, 180, 84, .35); background: rgba(255, 180, 84, .08); }
+.chip.red { color: var(--red); border-color: rgba(255, 97, 116, .35); background: rgba(255, 97, 116, .08); }
+
+/* ---------- 顶部 ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  background: linear-gradient(180deg, rgba(6, 14, 26, .96), rgba(6, 14, 26, .78) 70%, transparent);
+  backdrop-filter: blur(10px);
+}
+.club-mark {
+  width: 40px; height: 40px;
+  flex: none;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-weight: 900; font-size: 19px;
+  color: #04211d;
+  background: linear-gradient(145deg, #6bf5da, #1ebba1);
+  box-shadow: 0 5px 16px rgba(35, 201, 173, .28);
+}
+.club-info { min-width: 0; flex: 1; }
+.club-info b { display: block; font-size: 15px; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club-info small { color: var(--muted); font-size: 11px; }
+.top-right { display: flex; align-items: center; gap: 8px; }
+.money { text-align: right; line-height: 1.15; }
+.money b { display: block; font-size: 14px; color: var(--orange); font-variant-numeric: tabular-nums; }
+.money small { color: var(--muted); font-size: 10px; }
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .04);
+  display: grid; place-items: center;
+  font-size: 16px;
+}
+.icon-btn:active { background: rgba(255, 255, 255, .1); }
+
+/* ---------- 主区域 ---------- */
+#mainScreen { display: flex; flex-direction: column; min-height: 100dvh; }
+#view { flex: 1; padding: 2px 16px 96px; overflow-y: auto; scrollbar-width: none; }
+#view::-webkit-scrollbar { display: none; }
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(47, 224, 192, .2);
+  background:
+    radial-gradient(320px 160px at 100% 0%, rgba(47, 224, 192, .18), transparent 65%),
+    linear-gradient(150deg, #0f2336, #0b1929 60%, #0a1524);
+  box-shadow: var(--shadow);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -36px; bottom: -54px;
+  width: 170px; height: 170px;
+  border: 1px solid rgba(47, 224, 192, .16);
+  border-radius: 50%;
+  box-shadow: 0 0 0 22px rgba(47, 224, 192, .04), 0 0 0 44px rgba(47, 224, 192, .03);
+  pointer-events: none;
+}
+.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hero-tag {
+  font-size: 10px; font-weight: 800; letter-spacing: .16em;
+  color: var(--teal); text-transform: uppercase;
+}
+.hero-week { font-size: 11px; color: var(--muted); }
+.hero-main { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.hero-ovr {
+  width: 62px; height: 62px; flex: none;
+  border-radius: 18px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid var(--line);
+  line-height: 1;
+}
+.hero-ovr b { font-size: 25px; color: var(--orange); }
+.hero-ovr small { font-size: 8px; color: var(--muted); letter-spacing: .14em; margin-top: 4px; }
+.hero-opp { min-width: 0; flex: 1; }
+.hero-opp h3 { margin: 0; font-size: 22px; letter-spacing: .03em; line-height: 1.2; }
+.hero-opp p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+.hero-opp .flags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.hero-actions { display: flex; gap: 10px; margin-top: 16px; position: relative; z-index: 1; }
+.hero-actions .btn { flex: 1; }
+
+.quickstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px; }
+.qstat { padding: 11px 12px; border-radius: 13px; background: rgba(255, 255, 255, .035); border: 1px solid var(--line); }
+.qstat small { display: block; color: var(--muted); font-size: 10px; letter-spacing: .05em; }
+.qstat b { display: block; margin-top: 4px; font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* ---------- 球员 ---------- */
+.roster { display: flex; flex-direction: column; gap: 9px; }
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(24, 39, 61, .8), rgba(13, 24, 40, .8));
+}
+.player-avatar {
+  width: 44px; height: 44px; flex: none;
+  border-radius: 13px;
+  display: grid; place-items: center;
+  font-weight: 900; font-size: 18px;
+  color: #071a2b;
+  background: linear-gradient(145deg, #b9d6ff, #6ea8ff);
+  position: relative;
+}
+.player-avatar.b { background: linear-gradient(145deg, #ffd0a8, #ff9d5c); }
+.player-avatar.c { background: linear-gradient(145deg, #c6ffe9, #5ee0b5); }
+.player-avatar.d { background: linear-gradient(145deg, #e6d4ff, #b08cff); }
+.player-main { flex: 1; min-width: 0; }
+.player-name { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.player-name b { font-size: 15px; }
+.player-sub { display: flex; align-items: center; gap: 8px; margin-top: 3px; color: var(--muted); font-size: 11px; }
+.ovr-badge {
+  flex: none;
+  width: 42px; text-align: center;
+  line-height: 1.05;
+}
+.ovr-badge b { display: block; font-size: 20px; color: var(--teal); }
+.ovr-badge small { color: var(--muted); font-size: 8px; letter-spacing: .12em; }
+.bar { height: 5px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.bar > i { display: block; height: 100%; border-radius: 4px; background: var(--teal); transition: width .3s ease; }
+.bar.hp > i { background: linear-gradient(90deg, #2fe0c0, #6ef7dd); }
+.bar.hp.low > i { background: linear-gradient(90deg, #ff9f45, #ffb454); }
+.bar.hp.crit > i { background: linear-gradient(90deg, #ff4f62, #ff8c78); }
+.bar.mo > i { background: linear-gradient(90deg, #6ea8ff, #a8c8ff); }
+.stamina-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.stamina-line .bar { flex: 1; }
+.stamina-line span { font-size: 10px; color: var(--muted); width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.injury { color: var(--red); }
+
+/* ---------- 训练 ---------- */
+.train-intro {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px;
+  margin: 2px 0 12px;
+  border-radius: 13px;
+  background: rgba(47, 224, 192, .06);
+  border: 1px solid rgba(47, 224, 192, .16);
+  font-size: 12px; line-height: 1.6; color: #bfe9e1;
+}
+.train-card { margin-bottom: 10px; overflow: hidden; }
+.train-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px;
+  cursor: pointer;
+}
+.train-head .chev { color: var(--muted); font-size: 12px; transition: transform .2s; }
+.train-card.open .chev { transform: rotate(90deg); }
+.train-detail { padding: 0 12px 13px; }
+.program-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.program {
+  text-align: left;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  transition: border-color .15s, background .15s;
+}
+.program b { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.program b em { font-style: normal; font-size: 10px; color: var(--teal); }
+.program small { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; line-height: 1.4; }
+.program .cost { display: flex; gap: 8px; margin-top: 6px; font-size: 10px; color: var(--muted); }
+.program .cost .neg { color: var(--orange); }
+.program.selected { border-color: rgba(47, 224, 192, .55); background: rgba(47, 224, 192, .1); }
+.program.selected b em { color: var(--teal); }
+.program:disabled { opacity: .4; }
+.training-actions { position: sticky; bottom: 8px; margin-top: 14px; }
+.report-line { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+.report-line:last-child { border-bottom: 0; }
+.report-line .up { color: var(--teal); font-weight: 700; }
+
+/* ---------- 设施 ---------- */
+.facility { padding: 14px; margin-bottom: 10px; }
+.facility-head { display: flex; align-items: center; gap: 12px; }
+.facility-icon {
+  width: 46px; height: 46px; flex: none;
+  border-radius: 13px;
+  display: grid; place-items: center;
+  font-size: 21px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line);
+}
+.facility-title { flex: 1; }
+.facility-title b { font-size: 15px; }
+.facility-title small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+.level-pips { display: flex; gap: 4px; margin-top: 7px; }
+.level-pips i { width: 18px; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, .12); }
+.level-pips i.on { background: var(--teal); }
+.facility-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; }
+.facility-foot .price { font-size: 12px; color: var(--muted); }
+.facility-foot .price b { color: var(--orange); font-size: 14px; }
+
+/* ---------- 赛程 ---------- */
+.round {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .025);
+  margin-bottom: 8px;
+}
+.round .week-no {
+  width: 30px; height: 30px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .05);
+  color: var(--muted);
+  font-size: 11px; font-weight: 700;
+}
+.round .r-main { flex: 1; min-width: 0; }
+.round .r-main b { font-size: 14px; }
+.round .r-main small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
+.round .r-res { text-align: right; font-size: 11px; flex: none; }
+.round .r-res b { display: block; font-size: 15px; }
+.round.done { opacity: .8; }
+.round.done.win .r-res b { color: var(--teal); }
+.round.done.loss .r-res b { color: var(--red); }
+.round.now { border-color: rgba(255, 180, 84, .45); background: linear-gradient(120deg, rgba(255, 180, 84, .12), rgba(255, 180, 84, .02)); }
+.round.now .week-no { background: var(--orange); color: #241505; }
+.round.locked { opacity: .45; }
+
+/* ---------- 底栏 ---------- */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 540px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(5, 10, 19, .98) 55%, rgba(5, 10, 19, .86));
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+  z-index: 20;
+}
+.tab {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 7px 0 5px;
+  border-radius: 11px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+.tab i { font-size: 18px; font-style: normal; line-height: 1; filter: grayscale(.5); opacity: .8; }
+.tab.active { color: var(--text); background: rgba(47, 224, 192, .08); }
+.tab.active i { filter: none; opacity: 1; }
+.tab.active::after {
+  content: "";
+  width: 14px; height: 2px; border-radius: 2px;
+  background: var(--teal);
+  position: absolute;
+  bottom: 2px; left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---------- 标题页 ---------- */
+.title-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 34px 24px calc(26px + env(safe-area-inset-bottom));
+  position: relative;
+  overflow: hidden;
+}
+.title-screen::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(420px 240px at 50% 12%, rgba(47, 224, 192, .16), transparent 65%),
+    radial-gradient(300px 220px at 90% 50%, rgba(110, 168, 255, .1), transparent 70%);
+  pointer-events: none;
+}
+.brand { position: relative; text-align: center; margin-top: 8px; }
+.brand-kicker { font-size: 10px; letter-spacing: .42em; color: var(--teal); font-weight: 700; }
+.brand h1 {
+  margin: 12px 0 0;
+  font-size: 46px;
+  line-height: .98;
+  letter-spacing: .04em;
+  font-weight: 900;
+  background: linear-gradient(180deg, #ffffff 20%, #9fd8ce 70%, #58bfae);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 10px 50px rgba(47, 224, 192, .16);
+}
+.brand h1 small { display: block; font-size: 12px; letter-spacing: .58em; margin-top: 12px; color: var(--muted); font-weight: 500; -webkit-text-fill-color: var(--muted); }
+.brand p { margin: 14px auto 0; max-width: 300px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.hero-art { position: relative; height: 180px; margin: 6px 0; pointer-events: none; }
+.hero-table {
+  position: absolute; left: 50%; top: 44%;
+  width: 245px; height: 132px;
+  transform: translate(-50%, -50%) perspective(500px) rotateX(56deg);
+  border-radius: 8px;
+  background: linear-gradient(160deg, #14776a, #0a4a43);
+  border: 2px solid rgba(220, 255, 248, .55);
+  box-shadow: 0 26px 50px rgba(0, 0, 0, .55), 0 0 60px rgba(47, 224, 192, .12);
+}
+.hero-table::before {
+  content: "";
+  position: absolute; left: 6%; right: 6%; top: 50%;
+  height: 1px; background: rgba(255, 255, 255, .3);
+}
+.hero-table::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 50%;
+  height: 34px; transform: translateY(-100%);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px 9px);
+  border-top: 2px solid rgba(230, 250, 255, .7);
+  opacity: .55;
+}
+.hero-ball {
+  position: absolute; left: 50%; top: 40%;
+  width: 13px; height: 13px; margin-left: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff6cf, #ffc94d 55%, #e59510);
+  box-shadow: 0 0 16px rgba(255, 201, 77, .8);
+  animation: heroBounce 1.8s ease-in-out infinite;
+}
+@keyframes heroBounce {
+  0%, 100% { transform: translate(-54px, 32px) scale(.9); opacity: .9; }
+  40% { transform: translate(38px, -56px) scale(1.12); opacity: 1; }
+  70% { transform: translate(62px, 6px) scale(1); }
+}
+.title-actions { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.title-actions .btn { min-height: 52px; font-size: 16px; }
+.title-meta { position: relative; display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+.title-foot { position: relative; margin-top: 18px; text-align: center; color: rgba(142, 165, 198, .65); font-size: 9px; line-height: 1.7; }
+
+/* ---------- 赛前 ---------- */
+.screen-fixed {
+  position: fixed; inset: 0;
+  z-index: 40;
+  width: 100%; max-width: 540px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #071120, #04080f);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+@media (min-width: 600px) {
+  .screen-fixed { top: 18px; bottom: 18px; border-radius: 26px; border: 1px solid var(--line); }
+}
+.screen-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px 10px;
+}
+.screen-head h2 { margin: 0; font-size: 16px; letter-spacing: .05em; }
+.screen-head .spacer { flex: 1; }
+.screen-body { flex: 1; overflow-y: auto; padding: 4px 16px 120px; scrollbar-width: none; }
+.screen-body::-webkit-scrollbar { display: none; }
+
+.opp-banner {
+  display: flex; align-items: center; gap: 15px;
+  padding: 17px;
+  border-radius: 19px;
+  border: 1px solid rgba(110, 168, 255, .22);
+  background:
+    radial-gradient(260px 140px at 100% 0%, rgba(110, 168, 255, .16), transparent 65%),
+    linear-gradient(150deg, #11233d, #0a1729);
+}
+.opp-ovr { text-align: center; flex: none; width: 66px; }
+.opp-ovr b { font-size: 31px; line-height: 1; color: var(--orange); display: block; }
+.opp-ovr small { font-size: 8px; letter-spacing: .16em; color: var(--muted); }
+.opp-info h3 { margin: 0; font-size: 21px; }
+.opp-info p { margin: 5px 0 0; font-size: 11px; color: var(--muted); }
+.scout {
+  margin-top: 12px;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px dashed var(--line2);
+  background: rgba(255, 255, 255, .025);
+  font-size: 12px; line-height: 1.65;
+}
+.scout b { color: var(--blue); }
+.scout .weak { color: var(--orange); }
+.scout-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.scout-stat { background: rgba(255, 255, 255, .035); border-radius: 8px; padding: 5px 8px; font-size: 10px; color: var(--muted); }
+.scout-stat b { float: right; color: var(--text); font-size: 11px; }
+
+.lineup { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.pick {
+  text-align: left;
+  padding: 11px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  transition: border-color .15s, background .15s;
+}
+.pick.sel { border-color: rgba(47, 224, 192, .6); background: rgba(47, 224, 192, .09); }
+.pick .pk-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.pick .pk-top b { font-size: 13px; }
+.pick .pk-top span { font-size: 15px; color: var(--teal); font-weight: 800; }
+.pick .pk-sub { color: var(--muted); font-size: 10px; margin-top: 3px; }
+.pick .bar { margin-top: 8px; }
+.pick.injured { opacity: .5; }
+
+.tactics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tactic {
+  text-align: left;
+  padding: 11px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+}
+.tactic.sel { border-color: rgba(255, 180, 84, .6); background: rgba(255, 180, 84, .08); }
+.tactic .t-top { display: flex; justify-content: space-between; align-items: center; }
+.tactic b { font-size: 13px; }
+.tactic .counter { font-size: 9px; color: var(--teal); border: 1px solid rgba(47, 224, 192, .35); border-radius: 999px; padding: 1px 5px; }
+.tactic small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; line-height: 1.45; }
+.tactic:last-child:nth-child(odd) { grid-column: span 2; }
+.start-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 540px;
+  padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, #04080f 60%, rgba(4, 8, 15, .85) 85%, transparent);
+  z-index: 5;
+}
+.start-bar .btn { width: 100%; min-height: 50px; }
+
+/* ---------- 比赛 ---------- */
+.match-screen {
+  position: fixed; inset: 0; z-index: 50;
+  width: 100%; max-width: 540px; margin: 0 auto;
+  display: flex; flex-direction: column;
+  background: #04080f;
+  overflow: hidden;
+}
+@media (min-width: 600px) {
+  .match-screen { top: 18px; bottom: 18px; border-radius: 26px; border: 1px solid var(--line); }
+}
+.match-top {
+  padding: 10px 14px 6px;
+  background: linear-gradient(180deg, rgba(7, 17, 31, .98), rgba(7, 17, 31, .72));
+  border-bottom: 1px solid rgba(140, 180, 255, .08);
+  z-index: 2;
+}
+.mt-row { display: flex; align-items: center; gap: 10px; }
+.mt-close {
+  width: 32px; height: 32px; flex: none;
+  border-radius: 9px; border: 1px solid var(--line);
+  display: grid; place-items: center; color: var(--muted); font-size: 14px;
+}
+.mt-center { flex: 1; text-align: center; }
+.mt-center .round-label { font-size: 9px; letter-spacing: .18em; color: var(--muted); }
+.mt-center .games-dots { display: flex; justify-content: center; gap: 5px; margin-top: 4px; }
+.gd { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .16); }
+.gd.a { background: var(--teal); box-shadow: 0 0 8px rgba(47, 224, 192, .5); }
+.gd.b { background: var(--red); box-shadow: 0 0 8px rgba(255, 97, 116, .5); }
+.mt-side { width: 74px; }
+.mt-side.right { text-align: right; }
+.mt-side .nm { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-side .nat { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.score-row { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 2px 0 4px; }
+.score-row .sc { font-size: 38px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.score-row .sc.a { color: #b8fff1; }
+.score-row .sc.b { color: #ffc4cb; }
+.score-row .colon { color: var(--muted); font-size: 23px; font-weight: 300; }
+.serve-tag { font-size: 9px; color: var(--orange); letter-spacing: .1em; text-align: center; height: 12px; }
+.stam-row { display: flex; gap: 12px; padding: 5px 2px 4px; }
+.stam-side { flex: 1; }
+.stam-side.right { text-align: right; }
+.stam-side small { font-size: 9px; color: var(--muted); }
+.stam-side .bar { margin-top: 3px; height: 4px; }
+.stam-side .tac { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.stam-side .tac b { color: var(--text); font-weight: 600; }
+
+.court-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+#court { display: block; width: 100%; height: 100%; }
+.match-toast {
+  position: absolute; left: 50%; top: 12px;
+  transform: translateX(-50%) translateY(-8px);
+  max-width: 88%;
+  padding: 8px 13px;
+  border-radius: 10px;
+  background: rgba(8, 18, 32, .9);
+  border: 1px solid rgba(47, 224, 192, .3);
+  color: #d7fff7;
+  font-size: 11px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+  z-index: 5;
+  backdrop-filter: blur(6px);
+}
+.match-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.point-flash {
+  position: absolute; left: 50%; top: 42%;
+  transform: translate(-50%, -50%) scale(.8);
+  max-width: 88%;
+  text-align: center;
+  line-height: 1.3;
+  font-size: 24px; font-weight: 900;
+  color: var(--teal);
+  text-shadow: 0 4px 26px rgba(47, 224, 192, .5);
+  opacity: 0;
+  pointer-events: none;
+  letter-spacing: .06em;
+  white-space: normal;
+  z-index: 4;
+}
+.point-flash.bad { color: var(--red); text-shadow: 0 4px 26px rgba(255, 97, 116, .45); }
+.point-flash.show { animation: pflash .9s ease-out forwards; }
+@keyframes pflash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  70% { opacity: 1; transform: translate(-50%, -58%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -72%) scale(.98); }
+}
+
+.coachbar {
+  padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, #050b15 55%, rgba(5, 11, 21, .92));
+  border-top: 1px solid var(--line);
+  z-index: 2;
+}
+.momentum-row { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.momentum-row .m-label { font-size: 9px; color: var(--muted); letter-spacing: .08em; width: 48px; }
+.momentum { flex: 1; height: 5px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.momentum > i { display: block; height: 100%; background: linear-gradient(90deg, #1f8e7d, #ffb454); border-radius: 4px; transition: width .25s; }
+.momentum-row .m-val { font-size: 9px; color: var(--muted); width: 22px; text-align: right; }
+.coach-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.coach-btn {
+  position: relative;
+  min-height: 46px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .045);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.coach-btn small { font-size: 8px; color: var(--muted); font-weight: 500; }
+.coach-btn:active { background: rgba(255, 255, 255, .12); }
+.coach-btn:disabled { opacity: .35; }
+.coach-btn.ready { border-color: rgba(255, 180, 84, .5); color: var(--orange); }
+.coach-btn.burst.ready { border-color: rgba(47, 224, 192, .6); color: var(--teal); animation: pulse 1.4s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(47, 224, 192, .25); } 50% { box-shadow: 0 0 0 6px rgba(47, 224, 192, 0); } }
+
+.overlay {
+  position: absolute; inset: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: center;
+  padding: 22px;
+  background: rgba(2, 6, 12, .78);
+  backdrop-filter: blur(8px);
+}
+.overlay-card {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 22px;
+  border: 1px solid var(--line2);
+  background: linear-gradient(160deg, #0f1e33, #08111f);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .7);
+  padding: 22px;
+  text-align: center;
+}
+.overlay-card .kicker { font-size: 9px; letter-spacing: .24em; color: var(--muted); }
+.overlay-card h2 { margin: 8px 0 2px; font-size: 26px; letter-spacing: .04em; }
+.overlay-card .big-score { font-size: 40px; font-weight: 900; letter-spacing: .02em; margin: 8px 0 4px; }
+.overlay-card .big-score .win { color: var(--teal); }
+.overlay-card .big-score .lose { color: var(--red); }
+.overlay-card p { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 8px 0; }
+.overlay-card .btn { width: 100%; margin-top: 14px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+.result-cell { padding: 9px; border-radius: 11px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); }
+.result-cell small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .05em; }
+.result-cell b { display: block; margin-top: 4px; font-size: 15px; }
+
+/* ---------- 弹窗 / 提示 ---------- */
+#modalRoot { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+.modal-back {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(2, 6, 12, .65);
+  backdrop-filter: blur(5px);
+  pointer-events: auto;
+  animation: fadeIn .18s ease;
+}
+@media (min-width: 600px) { .modal-back { align-items: center; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  width: 100%; max-width: 460px;
+  max-height: 82dvh;
+  overflow-y: auto;
+  border-radius: 22px 22px 0 0;
+  border: 1px solid var(--line2);
+  background: linear-gradient(170deg, #101f34, #08111f);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, .6);
+  padding: 20px 18px calc(18px + env(safe-area-inset-bottom));
+  pointer-events: auto;
+  animation: slideUp .24s cubic-bezier(.2, .8, .3, 1);
+}
+@media (min-width: 600px) { .modal { border-radius: 22px; } }
+@keyframes slideUp { from { transform: translateY(24px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
+.modal h3 { margin: 0 0 4px; font-size: 18px; }
+.modal .m-sub { color: var(--muted); font-size: 11px; margin-bottom: 12px; }
+.modal .btn { width: 100%; margin-top: 10px; }
+.modal-close { position: absolute; right: 14px; top: 12px; }
+
+#toastRoot { position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%); z-index: 120; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: 100%; max-width: 420px; padding: 0 20px; }
+.toast {
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: rgba(10, 22, 39, .94);
+  border: 1px solid var(--line2);
+  color: var(--text);
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+  animation: toastIn .2s ease, toastOut .3s ease 2.2s forwards;
+  text-align: center;
+}
+.toast.good { border-color: rgba(47, 224, 192, .4); }
+.toast.bad { border-color: rgba(255, 97, 116, .4); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-6px); } }
+
+/* ---------- 赛季总结 ---------- */
+.season-screen {
+  position: fixed; inset: 0; z-index: 60;
+  width: 100%; max-width: 540px; margin: 0 auto;
+  overflow-y: auto;
+  background:
+    radial-gradient(420px 260px at 50% 0%, rgba(255, 180, 84, .16), transparent 60%),
+    linear-gradient(180deg, #0b1422, #04080f);
+  padding: 32px 20px calc(24px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.season-screen .trophy { font-size: 56px; line-height: 1; filter: drop-shadow(0 10px 30px rgba(255, 180, 84, .3)); }
+.season-screen h1 { margin: 12px 0 2px; font-size: 28px; letter-spacing: .04em; }
+.season-screen .grade { font-size: 72px; font-weight: 900; line-height: 1; margin: 12px 0; background: linear-gradient(180deg, #ffe3a8, #ffb454 60%, #b46a12); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.season-screen .s-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 18px 0; text-align: left; }
+.season-screen .s-stat { padding: 12px; border-radius: 13px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); }
+.season-screen .s-stat small { display: block; color: var(--muted); font-size: 10px; }
+.season-screen .s-stat b { display: block; margin-top: 4px; font-size: 17px; }
+
+/* 帮助列表 */
+.help-list { text-align: left; font-size: 12px; line-height: 1.7; color: #c6d6ee; padding-left: 18px; margin: 8px 0; }
+.help-list li { margin-bottom: 6px; }
+.help-list b { color: var(--teal); }
+.kbd { display: inline-block; padding: 1px 5px; border-radius: 5px; background: rgba(255, 255, 255, .08); border: 1px solid var(--line); font-size: 10px; }
+
+::-webkit-scrollbar { width: 0; height: 0; }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 标题页 -->
+  <section id="titleScreen" class="title-screen">
+    <div class="brand">
+      <div class="brand-kicker">ARC TABLE TENNIS CLUB</div>
+      <h1>弧光乒乓<small>俱乐部物语</small></h1>
+      <p>经营一支小俱乐部，把四个年轻人带上世界巡回赛的球台。</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="hero-table"></div>
+      <div class="hero-ball"></div>
+    </div>
+    <div>
+      <div class="title-actions">
+        <button id="continueBtn" class="btn btn-primary hidden" data-action="continue">继续生涯</button>
+        <button class="btn" data-action="new-game">新的生涯</button>
+        <button class="btn btn-ghost" data-action="help">玩法说明</button>
+      </div>
+      <div class="title-meta">
+        <span class="chip">模拟经营</span>
+        <span class="chip">实时球台</span>
+        <span class="chip gold">8 周赛季</span>
+      </div>
+      <div class="title-foot">球员数据参考 ITTF 2026 年第 46 周世界排名<br>比赛与经营数值为游戏平衡做了压缩，非真实赛果</div>
+    </div>
+  </section>
+
+  <!-- 主界面 -->
+  <section id="mainScreen" class="hidden">
+    <header class="topbar">
+      <div class="club-mark">弧</div>
+      <div class="club-info">
+        <b id="topClub">弧光俱乐部</b>
+        <small id="topWeek">第 1 赛季 · 第 1/8 周</small>
+      </div>
+      <div class="top-right">
+        <div class="money"><b id="topMoney">¥80,000</b><small id="topRep">声望 0</small></div>
+        <button class="icon-btn" id="soundBtn" data-action="toggle-sound" aria-label="声音开关">🔊</button>
+      </div>
+    </header>
+    <main id="view"></main>
+    <nav class="tabbar">
+      <button class="tab active" data-action="tab" data-tab="hub"><i>🏠</i>俱乐部</button>
+      <button class="tab" data-action="tab" data-tab="train"><i>🏓</i>训练</button>
+      <button class="tab" data-action="tab" data-tab="facility"><i>🏗️</i>设施</button>
+      <button class="tab" data-action="tab" data-tab="schedule"><i>📅</i>赛程</button>
+    </nav>
+  </section>
+
+  <!-- 赛前 -->
+  <section id="prematchScreen" class="screen-fixed hidden">
+    <div class="screen-head">
+      <button class="icon-btn" data-action="back-hub" aria-label="返回">‹</button>
+      <h2>赛前准备</h2>
+      <div class="spacer"></div>
+      <span class="chip gold" id="preFormat">三局两胜</span>
+    </div>
+    <div class="screen-body" id="prematchBody"></div>
+    <div class="start-bar">
+      <button class="btn btn-primary" id="startMatchBtn" data-action="start-match">踏上球台</button>
+    </div>
+  </section>
+
+  <!-- 比赛 -->
+  <section id="matchScreen" class="match-screen hidden">
+    <div class="match-top">
+      <div class="mt-row">
+        <button class="mt-close" data-action="leave-match" aria-label="退出比赛">✕</button>
+        <div class="mt-side">
+          <div class="nm" id="mNameA">陈野</div>
+          <div class="nat" id="mNatA">CHN · 弧圈</div>
+        </div>
+        <div class="mt-center">
+          <div class="round-label" id="mRound">第 1 局</div>
+          <div class="games-dots" id="mGames"></div>
+        </div>
+        <div class="mt-side right">
+          <div class="nm" id="mNameB">对手</div>
+          <div class="nat" id="mNatB">CHN · 快攻</div>
+        </div>
+      </div>
+      <div class="score-row">
+        <div class="sc a" id="mPtsA">0</div>
+        <div class="colon">:</div>
+        <div class="sc b" id="mPtsB">0</div>
+      </div>
+      <div class="serve-tag" id="mServe">发球：陈野</div>
+      <div class="stam-row">
+        <div class="stam-side">
+          <small id="mStamA">体能 100</small>
+          <div class="bar hp"><i id="mStamBarA" style="width:100%"></i></div>
+          <div class="tac">战术 <b id="mTacA">弧圈</b></div>
+        </div>
+        <div class="stam-side right">
+          <small id="mStamB">体能 100</small>
+          <div class="bar hp"><i id="mStamBarB" style="width:100%"></i></div>
+          <div class="tac">战术 <b id="mTacB">快攻</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="court-wrap" id="courtWrap">
+      <canvas id="court"></canvas>
+      <div class="match-toast" id="matchToast"></div>
+      <div class="point-flash" id="pointFlash"></div>
+    </div>
+
+    <div class="coachbar">
+      <div class="momentum-row">
+        <span class="m-label">气势</span>
+        <div class="momentum"><i id="mMomentum" style="width:45%"></i></div>
+        <span class="m-val" id="mMomentumVal">45</span>
+        <button class="chip" id="speedBtn" data-action="speed">1×</button>
+      </div>
+      <div class="coach-actions">
+        <button class="coach-btn" id="cbAttack" data-action="coach" data-coach="attack">抢攻<small>冷却 5 分</small></button>
+        <button class="coach-btn" id="cbDefend" data-action="coach" data-coach="defend">稳守<small>冷却 5 分</small></button>
+        <button class="coach-btn" id="cbTimeout" data-action="coach" data-coach="timeout">暂停<small>每局 1 次</small></button>
+        <button class="coach-btn burst" id="cbBurst" data-action="coach" data-coach="burst">爆发<small>气势满</small></button>
+      </div>
+    </div>
+
+    <div id="gameOverlay" class="overlay hidden">
+      <div class="overlay-card">
+        <div class="kicker">GAME</div>
+        <h2 id="goTitle">第 1 局结束</h2>
+        <div class="big-score" id="goScore">11 : 8</div>
+        <p id="goSub">陈野拿下这一局</p>
+        <button class="btn btn-primary" data-action="next-game">继续下一局</button>
+      </div>
+    </div>
+
+    <div id="matchResult" class="overlay hidden">
+      <div class="overlay-card" id="matchResultCard"></div>
+    </div>
+  </section>
+
+  <!-- 赛季总结 -->
+  <section id="seasonScreen" class="season-screen hidden"></section>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* 弧光乒乓 · 核心模拟引擎（纯逻辑，可在 Node 中测试） */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  root.TT = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const STAT_KEYS = ['power', 'spin', 'speed', 'defense', 'stamina', 'mental'];
+  const STAT_LABEL = {
+    power: '力量', spin: '旋转', speed: '速度',
+    defense: '防守', stamina: '耐力', mental: '心理'
+  };
+  const STYLE_LABEL = {
+    fast: '快攻', loop: '弧圈', control: '控制', chop: '削球', allout: '搏杀'
+  };
+  const STYLE_DESC = {
+    fast: '近台快压，抢先上手，节奏越快越强。',
+    loop: '两面弧圈，旋转足、连续性强。',
+    control: '落点控制与防守反击，失误少。',
+    chop: '退台削球，用旋转和耐心拖垮对手。',
+    allout: '高风险搏杀，一拍定胜负。'
+  };
+
+  // 战术：atk/def 权重之和为 1
+  const TACTICS = {
+    fast: {
+      name: '快攻', desc: '抢上升期，压反手大角',
+      atk: { power: .62, spin: .08, speed: .30 },
+      def: { power: 0, spin: 0, speed: 0 },
+      atkBonus: 4, defBonus: -2, error: .012, drain: 1.22
+    },
+    loop: {
+      name: '弧圈', desc: '加转弧圈，连续压制',
+      atk: { power: .45, spin: .46, speed: .09 },
+      def: { power: 0, spin: 0, speed: 0 },
+      atkBonus: 2, defBonus: 0, error: 0, drain: 1.1
+    },
+    control: {
+      name: '控制', desc: '摆短劈长，等你先失误',
+      atk: { power: .28, spin: .47, speed: .25 },
+      def: { power: 0, spin: 0, speed: 0 },
+      atkBonus: -4, defBonus: 7, error: -.022, drain: .85
+    },
+    chop: {
+      name: '削球', desc: '退台稳削，旋转变化',
+      atk: { power: .26, spin: .58, speed: .16 },
+      def: { power: 0, spin: 0, speed: 0 },
+      atkBonus: -7, defBonus: 12, error: -.018, drain: 1.0
+    },
+    allout: {
+      name: '搏杀', desc: '全台爆冲，不成功便成仁',
+      atk: { power: .62, spin: .28, speed: .10 },
+      def: { power: 0, spin: 0, speed: 0 },
+      atkBonus: 10, defBonus: -6, error: .05, drain: 1.4
+    }
+  };
+
+  const PROGRAMS = {
+    power: { key: 'power', name: '力量房', stat: 'power', gain: 70, stamina: -20, morale: -2, desc: '提升击球质量与杀球威力' },
+    spin: { key: 'spin', name: '多球弧圈', stat: 'spin', gain: 72, stamina: -22, morale: 0, desc: '连续拉冲，提升旋转与手感' },
+    speed: { key: 'speed', name: '步法冲刺', stat: 'speed', gain: 70, stamina: -24, morale: -1, desc: '交叉步与并步，覆盖更大范围' },
+    defense: { key: 'defense', name: '防守对拉', stat: 'defense', gain: 72, stamina: -20, morale: 0, desc: '中远台相持，提升稳定性' },
+    fitness: { key: 'fitness', name: '体能长跑', stat: 'stamina', gain: 68, stamina: -14, morale: 2, desc: '增强耐力，比赛后程不掉速' },
+    mental: { key: 'mental', name: '心理辅导', stat: 'mental', gain: 64, stamina: 6, morale: 10, desc: '关键分抗压，落后时不慌' },
+    rest: { key: 'rest', name: '休息调整', rest: true, stamina: 34, morale: 7, desc: '恢复体能和士气' }
+  };
+
+  const FACILITIES = {
+    gym: { key: 'gym', name: '训练中心', icon: '🏓', costs: [0, 18000, 42000], max: 3, effect: (l) => `训练收益 +${(l - 1) * 15}%` },
+    physio: { key: 'physio', name: '康复中心', icon: '🧊', costs: [0, 16000, 38000], max: 3, effect: (l) => `每周恢复 +${(l - 1) * 7} 体能` },
+    data: { key: 'data', name: '数据球探', icon: '📈', costs: [0, 15000, 36000], max: 3, effect: (l) => l === 1 ? '查看对手总评' : l === 2 ? '查看对手打法' : '查看弱点，比赛攻击 +3' }
+  };
+
+  // 基于 2026 年第 46 周 ITTF 世界排名（男子）设计的赛事阶梯
+  const OPPONENTS = [
+    { name: '滨江市体校', nat: 'CHN', club: '市体校队', style: 'control', overall: 50, tag: '热身赛' },
+    { name: '省青年队', nat: 'CHN', club: '省青年队', style: 'fast', overall: 54, tag: '省际邀请赛' },
+    { name: '国青新星', nat: 'CHN', club: '国家青年队', style: 'loop', overall: 58, tag: '国青对抗赛' },
+    { name: '卡尔德拉诺', nat: 'BRA', club: '世界排名第 7', style: 'allout', overall: 62, tag: 'WTT 挑战赛' },
+    { name: '张禹珍', nat: 'KOR', club: '世界排名第 8', style: 'fast', overall: 66, tag: 'WTT 球星挑战赛' },
+    { name: '林昀儒', nat: 'TPE', club: '世界排名第 5', style: 'control', overall: 70, tag: 'WTT 冠军赛' },
+    { name: '王楚钦', nat: 'CHN', club: '世界排名第 4', style: 'loop', overall: 74, tag: 'WTT 大满贯' },
+    { name: '松岛辉空', nat: 'JPN', club: '世界排名第 1', style: 'fast', overall: 78, tag: '世界巡回赛总决赛' }
+  ];
+
+  const MAX_WEEK = 8;
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const other = (s) => (s === 'A' ? 'B' : 'A');
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function overall(p) {
+    const s = p.stats;
+    return Math.round(
+      s.power * .20 + s.spin * .18 + s.speed * .18 +
+      s.defense * .20 + s.stamina * .12 + s.mental * .12
+    );
+  }
+
+  function makePlayer(o) {
+    const stats = {};
+    for (const k of STAT_KEYS) stats[k] = clamp(Math.round(o.stats[k]), 30, 95);
+    return {
+      id: o.id, name: o.name, nat: o.nat || 'CHN', age: o.age || 20,
+      style: o.style, hand: o.hand || 'right',
+      stats, stamina: 100, morale: 68, form: 1, potential: o.potential || 85,
+      progress: { power: 0, spin: 0, speed: 0, defense: 0, stamina: 0, mental: 0 },
+      injury: 0, wage: o.wage || 1200, career: { w: 0, l: 0 }, note: o.note || ''
+    };
+  }
+
+  function newGame(seed) {
+    seed = seed || (Date.now() % 2147483647);
+    const rng = mulberry32(seed);
+    const players = [
+      makePlayer({
+        id: 'p1', name: '陈野', age: 22, style: 'loop', potential: 90, wage: 1600,
+        note: '队内头号主力，正手弧圈质量高',
+        stats: { power: 74, spin: 78, speed: 64, defense: 60, stamina: 68, mental: 66 }
+      }),
+      makePlayer({
+        id: 'p2', name: '林小满', age: 19, style: 'fast', potential: 92, wage: 900,
+        note: '天赋型小将，近台速度极快',
+        stats: { power: 58, spin: 54, speed: 80, defense: 50, stamina: 70, mental: 58 }
+      }),
+      makePlayer({
+        id: 'p3', name: '周子豪', age: 25, style: 'chop', potential: 82, wage: 1100,
+        note: '老派削球手，越打越稳',
+        stats: { power: 50, spin: 62, speed: 56, defense: 82, stamina: 74, mental: 68 }
+      }),
+      makePlayer({
+        id: 'p4', name: '早川凛', age: 21, style: 'control', potential: 88, wage: 1300,
+        note: '留洋归来的控制型选手，心理素质好',
+        stats: { power: 54, spin: 65, speed: 63, defense: 72, stamina: 64, mental: 76 }
+      })
+    ];
+    return {
+      v: 1, seed, season: 1, maxWeek: MAX_WEEK, week: 1,
+      clubName: '弧光俱乐部', money: 80000, rep: 0, wins: 0, losses: 0,
+      players, facilities: { gym: 1, physio: 1, data: 1 },
+      weekTrained: false, seasonOver: false, results: [],
+      difficulty: 0, lastReport: null, champion: false
+    };
+  }
+
+  const STYLE_PROFILE = {
+    fast: { power: 2, spin: -4, speed: 10, defense: -5, stamina: 2, mental: 0 },
+    loop: { power: 5, spin: 9, speed: -3, defense: -2, stamina: 0, mental: 0 },
+    control: { power: -6, spin: 2, speed: -1, defense: 7, stamina: 1, mental: 7 },
+    chop: { power: -9, spin: 0, speed: -4, defense: 13, stamina: 4, mental: 3 },
+    allout: { power: 8, spin: 2, speed: 2, defense: -8, stamina: -2, mental: -4 }
+  };
+
+  function getOpponent(state, week) {
+    const meta = OPPONENTS[clamp(week, 1, OPPONENTS.length) - 1];
+    const rng = mulberry32(state.seed + week * 7919 + state.season * 131 + 17);
+    const target = meta.overall + (state.season - 1) * 2;
+    const prof = STYLE_PROFILE[meta.style];
+    const stats = {};
+    for (const k of STAT_KEYS) stats[k] = target + prof[k] + (rng() * 6 - 3);
+    const tmp = { stats };
+    const diff = target - overall(tmp);
+    for (const k of STAT_KEYS) stats[k] = clamp(Math.round(stats[k] + diff), 32, 96);
+    return {
+      id: 'opp' + week + '_' + state.season,
+      name: meta.name, nat: meta.nat, club: meta.club, tag: meta.tag,
+      style: meta.style, age: 20 + Math.floor(rng() * 10),
+      stats, stamina: 92 + Math.floor(rng() * 9), morale: 72, form: 1,
+      potential: 95, weekly: true
+    };
+  }
+
+  function facilityLevel(state, key) { return state.facilities[key] || 1; }
+
+  function trainPlayer(state, playerId, programKey, rng) {
+    const p = state.players.find((x) => x.id === playerId);
+    const prog = PROGRAMS[programKey];
+    if (!p || !prog) return { ok: false, msg: '参数错误' };
+    if (p.injury > 0) return { ok: false, msg: `${p.name} 正在伤病恢复，无法训练` };
+    const before = prog.rest ? null : p.stats[prog.stat];
+    const tired = !prog.rest && p.stamina < 35;
+    p.stamina = clamp(p.stamina + prog.stamina, 0, 100);
+    p.morale = clamp(p.morale + (prog.morale || 0), 0, 100);
+    if (prog.rest) {
+      return { ok: true, player: p.name, program: prog.name, gains: [], rest: true, tired: false };
+    }
+    let gain = prog.gain * (1 + (facilityLevel(state, 'gym') - 1) * 0.15);
+    gain *= p.age <= 20 ? 1.45 : p.age <= 24 ? 1.15 : 0.95;
+    if (tired) gain *= 0.6;
+    if (p.stamina < 25) gain *= 0.85;
+    p.progress[prog.stat] += gain;
+    const cap = Math.min(95, p.potential + 5);
+    let ups = 0;
+    while (p.progress[prog.stat] >= 100 && p.stats[prog.stat] < cap) {
+      p.stats[prog.stat] += 1;
+      p.progress[prog.stat] -= 100;
+      ups++;
+    }
+    if (p.stats[prog.stat] >= cap) p.progress[prog.stat] = Math.min(p.progress[prog.stat], 99);
+    let injury = false;
+    if (p.stamina < 10 && rng() < 0.16) {
+      p.injury = 1 + Math.floor(rng() * 2);
+      p.morale = clamp(p.morale - 16, 0, 100);
+      injury = true;
+    }
+    return {
+      ok: true, player: p.name, program: prog.name,
+      gains: ups ? [{ stat: prog.stat, label: STAT_LABEL[prog.stat], n: ups }] : [],
+      tired, injury, stamina: Math.round(p.stamina)
+    };
+  }
+
+  function upgradeFacility(state, key) {
+    const f = FACILITIES[key];
+    const lv = facilityLevel(state, key);
+    if (!f || lv >= f.max) return { ok: false, msg: '已经满级' };
+    const cost = f.costs[lv];
+    if (state.money < cost) return { ok: false, msg: '资金不足' };
+    state.money -= cost;
+    state.facilities[key] = lv + 1;
+    return { ok: true, level: lv + 1, cost };
+  }
+
+  function advanceWeek(state, rng) {
+    const income = 4500 + Math.floor(state.rep * 180);
+    const wages = state.players.reduce((s, p) => s + p.wage, 0);
+    state.money += income - wages;
+    const rec = 16 + facilityLevel(state, 'physio') * 7;
+    for (const p of state.players) {
+      p.stamina = clamp(p.stamina + rec, 0, 100);
+      if (p.injury > 0) { p.injury -= 1; p.stamina = Math.max(p.stamina, 35); }
+      p.morale = clamp(p.morale + (p.morale < 50 ? 5 : 1), 0, 100);
+      p.form = 0.97 + rng() * 0.06;
+    }
+    if (state.money < 0) {
+      state.money = 0;
+      for (const p of state.players) p.morale = clamp(p.morale - 6, 0, 100);
+    }
+    state.week += 1;
+    state.weekTrained = false;
+    if (state.week > state.maxWeek) state.seasonOver = true;
+    return { income, wages, rec };
+  }
+
+  function newSeason(state) {
+    state.season += 1;
+    state.week = 1;
+    state.seasonOver = false;
+    state.results = [];
+    state.wins = 0; state.losses = 0;
+    state.champion = false;
+    state.difficulty = (state.difficulty || 0) + 1;
+    state.weekTrained = false;
+    for (const p of state.players) {
+      p.age += 1;
+      p.stamina = 100;
+      p.morale = 65;
+      p.injury = 0;
+      p.form = 1;
+      if (p.age >= 29) {
+        for (const k of ['speed', 'stamina']) p.stats[k] = Math.max(40, p.stats[k] - 2);
+      }
+    }
+    return state;
+  }
+
+  /* ---------------- 比赛 ---------------- */
+
+  function snapshot(p, side, tactic, scoutBonus) {
+    return {
+      name: p.name, nat: p.nat, style: p.style,
+      stats: Object.assign({}, p.stats),
+      stamina: typeof p.stamina === 'number' ? p.stamina : 100,
+      morale: typeof p.morale === 'number' ? p.morale : 70,
+      form: p.form || 1,
+      tactic: tactic || p.style,
+      momentum: 45,
+      scoutBonus: scoutBonus || 0,
+      side
+    };
+  }
+
+  function createMatch(playerA, playerB, format, opts) {
+    opts = opts || {};
+    const A = snapshot(playerA, 'A', opts.tactic, opts.scoutBonus);
+    const B = snapshot(playerB, 'B', opts.aiTactic || playerB.style, 0);
+    B.stamina = clamp(B.stamina, 55, 100);
+    return {
+      A, B,
+      format: format || 3,
+      target: 11,
+      gamesA: 0, gamesB: 0,
+      pointsA: 0, pointsB: 0,
+      game: 1, serveCount: 0,
+      server: 'A', firstServer: 'A',
+      over: false, winner: null,
+      pointIndex: 0,
+      coach: { timeouts: 1, cooldown: 0, buff: null, buffUntil: 0 },
+      ai: { timeouts: 1, tactic: B.tactic, cooldown: 0 },
+      lastShot: null,
+      stats: { A: { winners: 0, errors: 0 }, B: { winners: 0, errors: 0 } },
+      log: []
+    };
+  }
+
+  function staminaFactor(p) { return 0.78 + 0.22 * clamp(p.stamina, 0, 100) / 100; }
+  function moraleFactor(p) { return 0.96 + clamp(p.morale, 0, 100) * 0.0006; }
+
+  function buffFor(match, side) {
+    const c = side === 'A' ? match.coach : match.ai;
+    if (c.buff && match.pointIndex < c.buffUntil) return c.buff;
+    return null;
+  }
+
+  function pressureBonus(match, side) {
+    const mine = side === 'A' ? match.pointsA : match.pointsB;
+    const theirs = side === 'A' ? match.pointsB : match.pointsA;
+    if (mine >= 8 && theirs >= 8 && Math.abs(mine - theirs) <= 2) {
+      return (match[side].stats.mental - 65) * 0.09;
+    }
+    return 0;
+  }
+
+  function counterAtk(atk, def) {
+    if (atk === 'fast' && def === 'chop') return 5;
+    if (atk === 'loop' && def === 'control') return 5;
+    return 0;
+  }
+  function counterDef(def, atk) {
+    if (def === 'control' && atk === 'fast') return 5;
+    if (def === 'chop' && atk === 'loop') return 5;
+    return 0;
+  }
+
+  function attackRating(match, side) {
+    const me = match[side], foe = match[other(side)];
+    const t = TACTICS[me.tactic];
+    let v = me.stats.power * t.atk.power + me.stats.spin * t.atk.spin + me.stats.speed * t.atk.speed;
+    v *= staminaFactor(me) * (me.form || 1) * moraleFactor(me);
+    v += t.atkBonus + counterAtk(me.tactic, foe.tactic) + pressureBonus(match, side);
+    v += (me.scoutBonus || 0);
+    const b = buffFor(match, side);
+    if (b) {
+      if (b.type === 'attack') v += 8;
+      if (b.type === 'burst') v += 11;
+    }
+    return v;
+  }
+
+  function defenseRating(match, side) {
+    const me = match[side], foe = match[other(side)];
+    const t = TACTICS[me.tactic];
+    let v = me.stats.defense * .62 + me.stats.speed * .25 + me.stats.mental * .13;
+    v *= staminaFactor(me) * (me.form || 1) * moraleFactor(me);
+    v += t.defBonus + counterDef(me.tactic, foe.tactic) + pressureBonus(match, side);
+    const b = buffFor(match, side);
+    if (b) {
+      if (b.type === 'defend') v += 8;
+      if (b.type === 'burst') v += 7;
+    }
+    return v;
+  }
+
+  function chooseKind(match, hitter, rng) {
+    const p = match[hitter];
+    const t = p.tactic;
+    const rally = match.pointIndex;
+    if (t === 'chop') return rng() < .72 ? 'chop' : (rng() < .5 ? 'push' : 'drive');
+    if (t === 'control') return rng() < .55 ? 'push' : 'loop';
+    if (t === 'allout') return rng() < .62 ? 'smash' : 'drive';
+    if (t === 'fast') return rng() < .42 ? 'smash' : 'drive';
+    return rng() < .22 ? 'smash' : (rng() < .72 ? 'loop' : 'drive');
+  }
+
+  const DUR = { serve: 1.05, loop: .8, drive: .72, smash: .52, push: .95, chop: 1.0 };
+  const KIND_LABEL = { serve: '发球', loop: '弧圈', drive: '快带', smash: '爆冲', push: '摆短', chop: '削球' };
+
+  function chooseTarget(match, hitter, kind, rng) {
+    const toFar = hitter === 'A';
+    let y = toFar ? 0.13 + rng() * 0.30 : 0.57 + rng() * 0.30;
+    if (kind === 'push') y = toFar ? 0.43 + rng() * 0.05 : 0.52 + rng() * 0.05;
+    if (kind === 'serve') y = toFar ? 0.24 + rng() * 0.16 : 0.60 + rng() * 0.16;
+    let x;
+    if (kind === 'push') x = (rng() * 2 - 1) * 0.55;
+    else if (kind === 'smash' || kind === 'chop') x = (rng() < .5 ? -1 : 1) * (0.55 + rng() * 0.38);
+    else x = (rng() * 2 - 1) * 0.82;
+    return { x: clamp(x, -1.05, 1.05), y };
+  }
+
+  function contactPoint(side, x) {
+    return { x: clamp(x, -0.92, 0.92), y: side === 'A' ? 1.035 : -0.035 };
+  }
+
+  function makeShot(match, hitter, receiver, from, target, kind, outcome, rng) {
+    const toFar = hitter === 'A';
+    const shot = {
+      hitter, receiver, kind, isServe: kind === 'serve',
+      from: { x: from.x, y: from.y }, bounces: [], net: null, out: null,
+      contact: null, end: outcome, duration: DUR[kind] || .8,
+      label: KIND_LABEL[kind] || ''
+    };
+    const ownY = toFar ? .62 + rng() * .04 : .38 - rng() * .04;
+    if (outcome === 'net') {
+      shot.net = { x: clamp(target.x * .55, -0.75, 0.75), y: .5 };
+      if (kind === 'serve') {
+        shot.bounces = [{ x: from.x * .6 + shot.net.x * .4, y: ownY }];
+      }
+      shot.duration *= .85;
+      return shot;
+    }
+    if (outcome === 'long') {
+      if (kind === 'serve') shot.bounces = [{ x: from.x * .7, y: ownY }];
+      shot.out = { x: target.x * .9, y: toFar ? -0.17 : 1.17 };
+      shot.duration *= 1.04;
+      return shot;
+    }
+    if (outcome === 'wide') {
+      if (kind === 'serve') shot.bounces = [{ x: from.x * .7, y: ownY }];
+      const bx = target.x > 0 ? 1.15 : -1.15;
+      shot.out = { x: bx > 0 ? 1.3 : -1.3, y: target.y };
+      shot.duration *= 1.0;
+      return shot;
+    }
+    if (outcome === 'winner') {
+      const second = {
+        x: target.x + (target.x > 0 ? .1 : -.1),
+        y: clamp(target.y + (toFar ? .04 : -.04), -0.05, 1.05)
+      };
+      shot.bounces = [{ x: target.x, y: target.y }, second];
+      shot.out = { x: second.x + (target.x > 0 ? .08 : -.08), y: second.y };
+      shot.duration *= 1.06;
+      return shot;
+    }
+    // return
+    const cp = contactPoint(receiver, target.x + (rng() * .5 - .25));
+    shot.bounces = [{ x: target.x, y: target.y }];
+    if (kind === 'serve') {
+      const ownY = toFar ? .62 + rng() * .04 : .38 - rng() * .04;
+      shot.bounces = [{ x: from.x * .7 + target.x * .3, y: ownY }, { x: target.x, y: target.y }];
+    }
+    shot.contact = cp;
+    return shot;
+  }
+
+  function pickError(rng, strong) {
+    const r = rng();
+    if (strong) {
+      if (r < .34) return 'net';
+      if (r < .68) return 'long';
+      if (r < .88) return 'wide';
+      return 'winner';
+    }
+    if (r < .4) return 'net';
+    if (r < .78) return 'long';
+    if (r < .94) return 'wide';
+    return 'winner';
+  }
+
+  function simulatePoint(match, rng) {
+    rng = rng || Math.random;
+    const server = match.server;
+    let hitter = server;
+    let receiver = other(server);
+    const shots = [];
+    let last = contactPoint(hitter, match[hitter].stats.power > 60 ? .45 : .3);
+    let winner = null, reason = '', attackerError = false;
+    const maxShots = 16;
+    let rally = 0;
+    let endKind = '';
+
+    for (let i = 0; i < maxShots; i++) {
+      rally++;
+      const isServe = i === 0;
+      const kind = isServe ? 'serve' : chooseKind(match, hitter, rng);
+      const atk = attackRating(match, hitter);
+      const def = defenseRating(match, receiver);
+      const t = TACTICS[match[hitter].tactic];
+      const tdef = TACTICS[match[receiver].tactic];
+
+      // 主动失误率
+      let pErr = .032 + t.error;
+      if (kind === 'smash') pErr += .035;
+      if (kind === 'serve') pErr = .018;
+      if (match[hitter].stamina < 35) pErr += .015;
+      pErr += Math.max(0, 18 - (atk - def)) * .0006;
+      pErr = clamp(pErr, .008, .16);
+
+      // 对方接不住率
+      let pFail = .125 + (atk - def) * .0105;
+      pFail += (match.hitter === 'A' ? 0 : 0);
+      pFail += t.error * .6;
+      pFail -= tdef.error * .5;
+      pFail += (match[receiver].stamina < 40 ? .02 : 0);
+      pFail += (match[receiver].momentum - match[hitter].momentum) * -.00045;
+      if (isServe) pFail += .028;
+      pFail = clamp(pFail, .035, .58);
+
+      const target = chooseTarget(match, hitter, kind, rng);
+      const roll = rng();
+
+      if (roll < pErr) {
+        const err = rng() < .55 ? 'net' : (rng() < .72 ? 'long' : 'wide');
+        shots.push(makeShot(match, hitter, receiver, last, target, kind, err, rng));
+        winner = receiver;
+        attackerError = true;
+        endKind = err;
+        const errName = err === 'net' ? '下网' : err === 'long' ? '出界' : '打飞';
+        reason = (isServe ? '发球失误' : `${KIND_LABEL[kind]}${errName}`);
+        break;
+      }
+      if (roll < pErr + pFail) {
+        const err = pickError(rng, atk - def > 12);
+        shots.push(makeShot(match, hitter, receiver, last, target, kind, err, rng));
+        winner = hitter;
+        endKind = err;
+        if (isServe) reason = '发球直接得分';
+        else if (kind === 'smash') reason = '爆冲得分';
+        else reason = `${KIND_LABEL[kind]}得分`;
+        break;
+      }
+
+      const shot = makeShot(match, hitter, receiver, last, target, kind, 'return', rng);
+      shots.push(shot);
+      last = shot.contact;
+      const tmp = hitter; hitter = receiver; receiver = tmp;
+    }
+
+    if (!winner) {
+      const lastHitter = shots.length ? shots[shots.length - 1].hitter : server;
+      winner = other(lastHitter);
+      attackerError = true;
+      reason = '体力透支，回球失误';
+      if (shots.length) shots[shots.length - 1].end = 'net';
+      if (shots.length) shots[shots.length - 1].net = { x: 0, y: .5 };
+      endKind = 'net';
+    }
+
+    const rallyDrain = .62 + rally * .085;
+    const drainA = clamp(rallyDrain * (TACTICS[match.A.tactic].drain) * (1.08 - match.A.stats.stamina / 700), .5, 4.5);
+    const drainB = clamp(rallyDrain * (TACTICS[match.B.tactic].drain) * (1.08 - match.B.stats.stamina / 700), .5, 4.5);
+    const winSide = winner;
+
+    if (endKind === 'winner' && !attackerError) {
+      // 记录在 applyPoint
+    }
+
+    return {
+      winner, attackerError, reason, rally, shots,
+      server, endKind,
+      drain: { A: drainA, B: drainB },
+      momentum: {
+        A: winSide === 'A' ? 7 : -5,
+        B: winSide === 'B' ? 7 : -5
+      },
+      winnerShotKind: shots.length ? shots[shots.length - 1].kind : 'serve',
+      score: { A: match.pointsA, B: match.pointsB }
+    };
+  }
+
+  function applyPoint(match, pt) {
+    if (match.over) return { matchOver: true };
+    if (pt.winner === 'A') match.pointsA++; else match.pointsB++;
+    if (pt.attackerError) match.stats[pt.winner === 'A' ? 'B' : 'A'].errors++;
+    else match.stats[pt.winner].winners++;
+    match.A.stamina = clamp(match.A.stamina - pt.drain.A, 0, 100);
+    match.B.stamina = clamp(match.B.stamina - pt.drain.B, 0, 100);
+    match.A.momentum = clamp(match.A.momentum + pt.momentum.A, 0, 100);
+    match.B.momentum = clamp(match.B.momentum + pt.momentum.B, 0, 100);
+    match.pointIndex++;
+    if (match.coach.cooldown > 0) match.coach.cooldown--;
+    if (match.coach.buff && match.pointIndex >= match.coach.buffUntil) match.coach.buff = null;
+    if (match.ai.buff && match.pointIndex >= match.ai.buffUntil) match.ai.buff = null;
+    match.log.push({ p: `${match.pointsA}:${match.pointsB}`, w: pt.winner, r: pt.reason, rally: pt.rally });
+
+    let gameOver = false, matchOver = false, gameWinner = null;
+    const a = match.pointsA, b = match.pointsB;
+    if ((a >= match.target || b >= match.target) && Math.abs(a - b) >= 2) {
+      gameOver = true;
+      if (a > b) { match.gamesA++; gameWinner = 'A'; } else { match.gamesB++; gameWinner = 'B'; }
+      const need = Math.floor(match.format / 2) + 1;
+      if (match.gamesA >= need || match.gamesB >= need) {
+        matchOver = true;
+        match.over = true;
+        match.winner = match.gamesA > match.gamesB ? 'A' : 'B';
+      }
+    }
+
+    if (!gameOver) {
+      const deuce = match.pointsA >= 10 && match.pointsB >= 10;
+      match.serveCount++;
+      if (match.serveCount >= (deuce ? 1 : 2)) {
+        match.serveCount = 0;
+        match.server = other(match.server);
+      }
+    }
+    return { gameOver, matchOver, gameWinner, matchWinner: match.winner };
+  }
+
+  function startNextGame(match) {
+    if (match.over) return;
+    match.pointsA = 0; match.pointsB = 0;
+    match.game++;
+    match.firstServer = other(match.firstServer);
+    match.server = match.firstServer;
+    match.serveCount = 0;
+    match.coach.timeouts = 1;
+    match.coach.cooldown = 0;
+    match.coach.buff = null;
+    match.ai.timeouts = 1;
+    match.ai.buff = null;
+    match.ai.cooldown = 0;
+  }
+
+  function coachAction(match, type) {
+    if (match.over) return { ok: false, msg: '比赛已结束' };
+    const c = match.coach;
+    if (type === 'attack' || type === 'defend') {
+      if (c.cooldown > 0) return { ok: false, msg: `战术冷却中（${c.cooldown} 分）` };
+      c.buff = { type };
+      c.buffUntil = match.pointIndex + 4;
+      c.cooldown = 5;
+      return { ok: true, msg: type === 'attack' ? '教练：抢攻！增加进攻压迫 4 分' : '教练：稳守！提升防守 4 分' };
+    }
+    if (type === 'timeout') {
+      if (c.timeouts <= 0) return { ok: false, msg: '本局暂停已用完' };
+      c.timeouts--;
+      match.A.stamina = clamp(match.A.stamina + 9, 0, 100);
+      match.A.morale = clamp(match.A.morale + 4, 0, 100);
+      match.B.momentum = clamp(match.B.momentum - 28, 0, 100);
+      return { ok: true, msg: '暂停：恢复体能，打断对手节奏' };
+    }
+    if (type === 'burst') {
+      if (match.A.momentum < 99) return { ok: false, msg: '气势未满，无法爆发' };
+      match.A.momentum = 0;
+      c.buff = { type: 'burst' };
+      c.buffUntil = match.pointIndex + 3;
+      return { ok: true, msg: '气势爆发！接下来 3 分全面提升' };
+    }
+    return { ok: false, msg: '未知指令' };
+  }
+
+  function aiAdjust(match, rng) {
+    rng = rng || Math.random;
+    if (match.over) return '';
+    if (match.ai.cooldown > 0) { match.ai.cooldown--; return ''; }
+    let msg = '';
+    if (match.ai.timeouts > 0) {
+      const danger = (match.pointsB <= 9 && match.pointsA >= 10) || (match.pointsB <= 7 && match.pointsA - match.pointsB >= 5);
+      if (danger && rng() < .5) {
+        match.ai.timeouts--;
+        match.B.stamina = clamp(match.B.stamina + 6, 0, 100);
+        match.A.momentum = clamp(match.A.momentum - 16, 0, 100);
+        match.ai.cooldown = 3;
+        return '对手请求暂停，打断了你的节奏';
+      }
+    }
+    if (match.pointsA - match.pointsB >= 5 && rng() < .4) {
+      const counter = { fast: 'control', control: 'loop', loop: 'chop', chop: 'fast', allout: 'control' };
+      const nt = counter[match.A.tactic] || 'loop';
+      if (nt !== match.B.tactic) {
+        match.B.tactic = nt;
+        match.ai.cooldown = 9;
+        msg = `对手改变战术：${TACTICS[nt].name}`;
+      }
+    }
+    return msg;
+  }
+
+  function simulateMatch(a, b, format, rng) {
+    rng = rng || Math.random;
+    const m = createMatch(a, b, format);
+    let guard = 0;
+    while (!m.over && guard++ < 500) {
+      const pt = simulatePoint(m, rng);
+      const ev = applyPoint(m, pt);
+      if (ev.gameOver && !ev.matchOver) startNextGame(m);
+      if (!ev.matchOver) aiAdjust(m, rng);
+    }
+    return m;
+  }
+
+  function finishMatch(state, match, opponent) {
+    const win = match.winner === 'A';
+    const prize = win ? 15000 + state.week * 1500 : 5000;
+    const rep = win ? 12 : 3;
+    state.money += prize;
+    state.rep += rep;
+    if (win) state.wins++; else state.losses++;
+    const p = state.players.find((x) => x.name === match.A.name);
+    if (p) {
+      p.stamina = clamp(match.A.stamina, 0, 100);
+      p.morale = clamp(p.morale + (win ? 9 : -6), 0, 100);
+      p.form = clamp(p.form + (win ? .01 : -.01), .95, 1.05);
+      p.career.w += win ? 1 : 0;
+      p.career.l += win ? 0 : 1;
+      const xpStat = p.style === 'fast' ? 'speed' : p.style === 'chop' ? 'defense' : 'spin';
+      const cap = Math.min(95, p.potential + 5);
+      if (p.stats[xpStat] < cap) {
+        p.progress[xpStat] += win ? 22 : 14;
+        while (p.progress[xpStat] >= 100 && p.stats[xpStat] < cap) {
+          p.stats[xpStat] += 1; p.progress[xpStat] -= 100;
+        }
+      }
+    }
+    const rec = {
+      week: state.week, name: opponent.name, nat: opponent.nat,
+      score: `${match.gamesA}:${match.gamesB}`, win,
+      points: `${match.pointsA}:${match.pointsB}`, prize, rep,
+      player: match.A.name
+    };
+    state.results.push(rec);
+    state.lastReport = rec;
+    if (state.week >= state.maxWeek && win && state.results.filter((r) => r.win).length >= 7) {
+      state.champion = true;
+    }
+    return {
+      win, prize, rep,
+      games: `${match.gamesA}:${match.gamesB}`,
+      stats: match.stats,
+      stamina: Math.round(match.A.stamina),
+      record: rec
+    };
+  }
+
+  function seasonSummary(state) {
+    const played = state.results.length;
+    const wins = state.results.filter((r) => r.win).length;
+    let grade = 'D';
+    if (wins >= 7) grade = 'S';
+    else if (wins === 6) grade = 'A';
+    else if (wins === 5) grade = 'B';
+    else if (wins === 4) grade = 'C';
+    const byPlayer = {};
+    for (const r of state.results) {
+      if (r.win && r.player) byPlayer[r.player] = (byPlayer[r.player] || 0) + 1;
+    }
+    const ranked = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]);
+    let mvpName = ranked.length ? ranked[0][0] : null;
+    if (!mvpName) {
+      const fallback = state.players.slice().sort((a, b) => (b.career.w - b.career.l) - (a.career.w - a.career.l))[0];
+      mvpName = fallback ? fallback.name : '—';
+    }
+    return {
+      played, wins, losses: played - wins, grade,
+      money: state.money, rep: state.rep,
+      mvp: mvpName,
+      champion: !!state.champion
+    };
+  }
+
+  return {
+    STAT_KEYS, STAT_LABEL, STYLE_LABEL, STYLE_DESC, TACTICS, PROGRAMS, FACILITIES,
+    OPPONENTS, MAX_WEEK,
+    clamp, other, mulberry32, overall,
+    newGame, getOpponent, trainPlayer, upgradeFacility, advanceWeek, newSeason,
+    createMatch, simulatePoint, applyPoint, startNextGame,
+    coachAction, aiAdjust, simulateMatch, finishMatch, seasonSummary,
+    facilityLevel
+  };
+});
+
+</script>
+<script>
+/* 球台与比赛画面：Canvas 2D 伪 3D */
+(function () {
+  'use strict';
+
+  const V = {
+    canvas: null, ctx: null, W: 0, H: 0, dpr: 1,
+    running: false, raf: 0, last: 0, speed: 1,
+    match: null,
+    players: {
+      A: { x: 0, tx: 0, swing: 0 },
+      B: { x: 0, tx: 0, swing: 0 }
+    },
+    anim: null, trail: [], particles: [], crowd: [],
+    lastNow: 0, celebrateUntil: 0
+  };
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  function geom() {
+    const W = V.W, H = V.H;
+    return {
+      cx: W / 2,
+      top: H * 0.19,
+      bottom: H * 0.715,
+      farW: W * 0.225,
+      nearW: W * 0.475,
+      zScale: H * 0.27
+    };
+  }
+
+  function proj(x, y, z) {
+    const g = geom();
+    const py = g.top + (g.bottom - g.top) * y;
+    const hw = g.farW + (g.nearW - g.farW) * y;
+    const depth = 0.72 + 0.38 * y;
+    return {
+      x: g.cx + x * hw,
+      y: py - (z || 0) * g.zScale * depth,
+      py: py,
+      s: depth
+    };
+  }
+
+  function anchor(side, x) {
+    const near = side === 'A';
+    return {
+      x: V.W / 2 + clamp(x, -1.08, 1.08) * (near ? V.W * 0.405 : V.W * 0.19),
+      feetY: near ? V.H * 0.93 : V.H * 0.135,
+      h: near ? V.H * 0.205 : V.H * 0.112,
+      near
+    };
+  }
+
+  function roundRect(c, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function initCanvas(canvas, match) {
+    V.canvas = canvas;
+    V.ctx = canvas.getContext('2d');
+    V.match = match;
+    V.players.A = { x: 0, tx: 0, swing: 0 };
+    V.players.B = { x: 0, tx: 0, swing: 0 };
+    V.trail = [];
+    V.particles = [];
+    buildCrowd();
+    resize();
+    if (typeof ResizeObserver !== 'undefined') {
+      if (V.ro) V.ro.disconnect();
+      V.ro = new ResizeObserver(() => resize());
+      V.ro.observe(canvas.parentElement);
+    }
+    start();
+  }
+
+  function resize() {
+    if (!V.canvas) return;
+    const r = V.canvas.parentElement.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    V.dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    V.W = r.width;
+    V.H = r.height;
+    V.canvas.width = Math.round(V.W * V.dpr);
+    V.canvas.height = Math.round(V.H * V.dpr);
+    V.canvas.style.width = V.W + 'px';
+    V.canvas.style.height = V.H + 'px';
+    V.ctx.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
+  }
+
+  function buildCrowd() {
+    V.crowd = [];
+    const rng = (function (a) {
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    })(20261122);
+    const colors = ['#3f5f8a', '#2f7d76', '#7d5a45', '#59648c', '#8a4b57', '#33506b'];
+    for (let row = 0; row < 7; row++) {
+      const y = 0.026 + row * 0.018;
+      const count = 34 + row * 5;
+      for (let i = 0; i < count; i++) {
+        V.crowd.push({
+          x: rng(), y: y + rng() * 0.012,
+          r: 0.8 + rng() * 1.7,
+          c: colors[Math.floor(rng() * colors.length)],
+          ph: rng() * Math.PI * 2,
+          a: 0.18 + rng() * 0.38
+        });
+      }
+    }
+  }
+
+  function start() {
+    if (V.running) return;
+    V.running = true;
+    V.last = performance.now();
+    V.raf = requestAnimationFrame(loop);
+  }
+
+  function stop() {
+    V.running = false;
+    if (V.raf) cancelAnimationFrame(V.raf);
+    V.raf = 0;
+    if (V.anim && !V.anim.done) {
+      V.anim.done = true;
+      const r = V.anim.resolve;
+      V.anim = null;
+      if (r) r();
+    }
+  }
+
+  function loop(now) {
+    if (!V.running) return;
+    const dt = Math.min((now - V.last) / 1000, 0.06);
+    V.last = now;
+    V.now = now / 1000;
+    update(dt);
+    if (V.W && V.H) draw(V.now);
+    V.raf = requestAnimationFrame(loop);
+  }
+
+  /* ---------------- 动画时间线 ---------------- */
+
+  const KIND_ARC = { serve: 0.30, loop: 0.52, drive: 0.38, smash: 0.17, push: 0.24, chop: 0.62 };
+
+  function buildTimeline(pt) {
+    const segs = [], events = [];
+    let t = 0;
+
+    let tossed = false;
+    for (const shot of pt.shots) {
+      if (shot.isServe && !tossed) {
+        tossed = true;
+        const a = { x: shot.from.x, y: shot.from.y, z: 0.30 };
+        segs.push({ a, b: { x: a.x, y: a.y, z: 0.30 }, arc: 0.20, dur: 0.34, tag: 'toss', kind: 'serve' });
+        t += 0.34;
+      }
+      events.push({ t, type: 'hit', shot, side: shot.hitter });
+      let cur = { x: shot.from.x, y: shot.from.y, z: 0.30 };
+      const path = [];
+      for (const b of shot.bounces) path.push({ x: b.x, y: b.y, z: 0, tag: 'bounce' });
+      if (shot.end === 'net') path.push({ x: shot.net.x, y: shot.net.y, z: 0.105, tag: 'net' });
+      if (shot.contact) path.push({ x: shot.contact.x, y: shot.contact.y, z: 0.30, tag: 'contact' });
+      if (shot.out) path.push({ x: shot.out.x, y: shot.out.y, z: 0.03, tag: 'out' });
+      if (shot.end === 'net') path.push({ x: shot.net.x, y: shot.net.y, z: 0, tag: 'floor' });
+
+      const weights = path.map((p) => {
+        const d = Math.hypot(p.x - cur.x, (p.y - cur.y) * 1.35) + Math.abs(p.z - cur.z) * 0.4;
+        return 0.22 + d;
+      });
+      const sum = weights.reduce((a, b) => a + b, 0) || 1;
+
+      for (let i = 0; i < path.length; i++) {
+        const p = path[i];
+        const dur = Math.max(0.08, shot.duration * (weights[i] / sum));
+        let arc = KIND_ARC[shot.kind] || 0.4;
+        if (i > 0) arc = p.tag === 'out' ? 0.10 : p.tag === 'floor' ? 0 : 0.28;
+        if (shot.kind === 'smash' && i > 0) arc = 0.14;
+        if (shot.isServe && i === 0) arc = 0.16;
+        if (shot.isServe && i === 1) arc = 0.22;
+        if (p.tag === 'contact' && i > 0) arc = 0.34;
+        if (p.tag === 'net' && shot.end === 'net') arc = 0.04;
+        segs.push({ a: cur, b: p, arc, dur, tag: p.tag, kind: shot.kind });
+        t += dur;
+        if (p.tag === 'bounce' || p.tag === 'out' || p.tag === 'net') {
+          events.push({ t, type: p.tag, p, side: shot.hitter });
+        }
+        cur = p;
+      }
+    }
+    return { segs, events, total: t, pt, elapsed: 0, ei: 0, done: false, hold: 0.62, resolve: null };
+  }
+
+  function playPoint(pt) {
+    if (V.anim && !V.anim.done) {
+      V.anim.done = true;
+      const old = V.anim.resolve;
+      V.anim = null;
+      if (old) old();
+    }
+    V.trail = [];
+    const anim = buildTimeline(pt);
+    return new Promise((resolve) => {
+      anim.resolve = resolve;
+      V.anim = anim;
+    });
+  }
+
+  function update(dt) {
+    const pA = V.players.A, pB = V.players.B;
+    const rate = Math.min(1, dt * 9);
+    pA.x += (pA.tx - pA.x) * rate;
+    pB.x += (pB.tx - pB.x) * rate;
+    pA.swing = Math.max(0, pA.swing - dt * 3.2);
+    pB.swing = Math.max(0, pB.swing - dt * 3.2);
+
+    for (const p of V.particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 320 * dt;
+      p.life -= dt;
+    }
+    V.particles = V.particles.filter((p) => p.life > 0);
+
+    for (const tr of V.trail) tr.life -= dt;
+    V.trail = V.trail.filter((t) => t.life > 0);
+
+    const a = V.anim;
+    if (!a || a.done) return;
+    a.elapsed += dt * V.speed;
+
+    while (a.ei < a.events.length && a.events[a.ei].t <= a.elapsed) {
+      const ev = a.events[a.ei++];
+      if (ev.type === 'hit') {
+        const side = ev.shot.hitter;
+        V.players[side].swing = 1;
+        V.players[side].tx = clamp(ev.shot.from.x, -1, 1);
+        const recv = side === 'A' ? 'B' : 'A';
+        const target = ev.shot.bounces[0] || ev.shot.net || ev.shot.out || { x: 0 };
+        V.players[recv].tx = clamp(target.x, -0.95, 0.95);
+        if (window.Sound) window.Sound.hit(ev.shot.kind);
+      } else if (ev.type === 'bounce' || ev.type === 'out') {
+        spawnDust(ev.p, 5);
+        if (window.Sound) window.Sound.bounce();
+      } else if (ev.type === 'net') {
+        spawnDust(ev.p, 8);
+        if (window.Sound) window.Sound.bounce();
+      }
+    }
+
+    const ball = ballAt(a.elapsed);
+    if (ball && !a.done && a.elapsed < a.total + 0.15) {
+      V.trail.push({ x: ball.x, y: ball.y, r: ball.r, life: 0.22, max: 0.22 });
+    }
+    while (V.trail.length > 18) V.trail.shift();
+
+    if (a.elapsed > a.total + a.hold && !a.done) {
+      a.done = true;
+      const r = a.resolve;
+      V.anim = null;
+      if (r) r();
+    }
+  }
+
+  function ballAt(elapsed) {
+    const a = V.anim;
+    if (!a || !a.segs.length) return null;
+    let acc = 0;
+    for (const seg of a.segs) {
+      if (elapsed <= acc + seg.dur) {
+        const u = clamp((elapsed - acc) / seg.dur, 0, 1);
+        const x = seg.a.x + (seg.b.x - seg.a.x) * u;
+        const y = seg.a.y + (seg.b.y - seg.a.y) * u;
+        const z = seg.a.z + (seg.b.z - seg.a.z) * u + seg.arc * 4 * u * (1 - u);
+        const p = proj(x, y, z);
+        const r = clamp(3.2 + 3.2 * p.s, 3.5, 7.2);
+        return { x: p.x, y: p.y, worldX: x, worldY: y, z, r, u };
+      }
+      acc += seg.dur;
+    }
+    const last = a.segs[a.segs.length - 1].b;
+    const p = proj(last.x, last.y, last.z);
+    return { x: p.x, y: p.y, worldX: last.x, worldY: last.y, z: last.z, r: 4.5, u: 1 };
+  }
+
+  function spawnDust(p, n) {
+    const s = proj(p.x, p.y, 0.02);
+    for (let i = 0; i < n; i++) {
+      V.particles.push({
+        x: s.x, y: s.y,
+        vx: (Math.random() - 0.5) * 60,
+        vy: -Math.random() * 45,
+        r: 1 + Math.random() * 1.8,
+        life: 0.3 + Math.random() * 0.3,
+        max: 0.6,
+        c: 'rgba(180, 240, 225,'
+      });
+    }
+  }
+
+  function celebrate(win) {
+    const colors = win ? ['#2fe0c0', '#ffd166', '#ffffff', '#6ea8ff'] : ['#ff6174', '#8ea5c6'];
+    for (let i = 0; i < 70; i++) {
+      V.particles.push({
+        x: Math.random() * V.W,
+        y: V.H * (0.2 + Math.random() * 0.2),
+        vx: (Math.random() - 0.5) * 90,
+        vy: -Math.random() * 120,
+        r: 1.5 + Math.random() * 2.6,
+        life: 1.2 + Math.random(),
+        max: 2.2,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        confetti: true
+      });
+    }
+    V.celebrateUntil = V.now + 2;
+  }
+
+  /* ---------------- 绘制 ---------------- */
+
+  function draw(t) {
+    const c = V.ctx, W = V.W, H = V.H;
+    c.clearRect(0, 0, W, H);
+    drawBackground(t);
+    drawCrowd(t);
+    drawPlayer('B', t);
+    drawTable();
+    drawNet();
+    drawPlayer('A', t);
+    drawBallAndTrail();
+    drawParticles();
+  }
+
+  function drawBackground(t) {
+    const c = V.ctx, W = V.W, H = V.H;
+    const g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#040812');
+    g.addColorStop(0.45, '#081426');
+    g.addColorStop(0.78, '#06101d');
+    g.addColorStop(1, '#03060b');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    let s = c.createRadialGradient(W * 0.18, -H * 0.05, 10, W * 0.18, -H * 0.05, W * 0.75);
+    s.addColorStop(0, 'rgba(57, 115, 190, .22)');
+    s.addColorStop(1, 'rgba(57, 115, 190, 0)');
+    c.fillStyle = s;
+    c.fillRect(0, 0, W, H);
+
+    s = c.createRadialGradient(W * 0.86, -H * 0.02, 10, W * 0.86, -H * 0.02, W * 0.7);
+    s.addColorStop(0, 'rgba(38, 180, 160, .14)');
+    s.addColorStop(1, 'rgba(38, 180, 160, 0)');
+    c.fillStyle = s;
+    c.fillRect(0, 0, W, H);
+
+    // 光束
+    c.save();
+    c.globalAlpha = 0.05;
+    c.fillStyle = '#bfe8ff';
+    c.beginPath();
+    c.moveTo(W * 0.34, 0); c.lineTo(W * 0.24, H * 0.7); c.lineTo(W * 0.38, H * 0.7); c.lineTo(W * 0.46, 0);
+    c.closePath(); c.fill();
+    c.beginPath();
+    c.moveTo(W * 0.66, 0); c.lineTo(W * 0.76, H * 0.7); c.lineTo(W * 0.62, H * 0.7); c.lineTo(W * 0.54, 0);
+    c.closePath(); c.fill();
+    c.restore();
+
+    // 场馆灯带
+    c.save();
+    c.globalAlpha = 0.35;
+    c.strokeStyle = 'rgba(120, 190, 255, .5)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, H * 0.018); c.lineTo(W, H * 0.018); c.stroke();
+    c.restore();
+
+    // 顶部赛事字
+    c.save();
+    c.globalAlpha = 0.5;
+    c.fillStyle = '#9fc9e8';
+    c.font = `700 ${Math.max(8, W * 0.022)}px system-ui, sans-serif`;
+    c.textAlign = 'center';
+    if (c.letterSpacing !== undefined) c.letterSpacing = '4px';
+    c.fillText('ARC OPEN  ·  弧光杯', W / 2, H * 0.052);
+    c.restore();
+
+    // 地板
+    const fy = geom().bottom;
+    const fg = c.createLinearGradient(0, fy, 0, H);
+    fg.addColorStop(0, 'rgba(10, 25, 38, .9)');
+    fg.addColorStop(1, 'rgba(3, 7, 12, 1)');
+    c.fillStyle = fg;
+    c.fillRect(0, fy, W, H - fy);
+  }
+
+  function drawCrowd(t) {
+    const c = V.ctx, W = V.W, H = V.H;
+    c.save();
+    for (const p of V.crowd) {
+      const tw = 0.75 + 0.25 * Math.sin(t * 0.8 + p.ph);
+      c.globalAlpha = p.a * tw;
+      c.fillStyle = p.c;
+      c.beginPath();
+      c.arc(p.x * W, p.y * H, p.r * (W / 430), 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
+    // 观众席暗部
+    const g = c.createLinearGradient(0, H * 0.1, 0, H * 0.18);
+    g.addColorStop(0, 'rgba(3,7,13,0)');
+    g.addColorStop(1, 'rgba(3,7,13,.85)');
+    c.fillStyle = g;
+    c.fillRect(0, H * 0.1, W, H * 0.08);
+  }
+
+  function drawTable() {
+    const c = V.ctx;
+    const fl = proj(-1, 0), fr = proj(1, 0), nr = proj(1, 1), nl = proj(-1, 1);
+    const g = geom();
+
+    // 桌腿
+    c.save();
+    c.strokeStyle = 'rgba(7, 16, 26, .95)';
+    c.lineWidth = Math.max(5, V.W * 0.016);
+    c.beginPath();
+    c.moveTo(nl.x + 8, nl.y + 4); c.lineTo(nl.x + 12, nl.y + V.H * 0.075);
+    c.moveTo(nr.x - 8, nr.y + 4); c.lineTo(nr.x - 12, nr.y + V.H * 0.075);
+    c.stroke();
+    c.restore();
+
+    // 台面阴影
+    c.save();
+    c.fillStyle = 'rgba(0, 0, 0, .35)';
+    c.beginPath();
+    c.moveTo(fl.x, fl.y + 12); c.lineTo(fr.x, fr.y + 12);
+    c.lineTo(nr.x, nr.y + 16); c.lineTo(nl.x, nl.y + 16);
+    c.closePath(); c.fill();
+    c.restore();
+
+    // 近端台沿（厚度）
+    c.fillStyle = '#042f2a';
+    c.beginPath();
+    c.moveTo(nl.x, nl.y); c.lineTo(nr.x, nr.y);
+    c.lineTo(nr.x, nr.y + 9); c.lineTo(nl.x, nl.y + 9);
+    c.closePath(); c.fill();
+
+    // 台面
+    const grad = c.createLinearGradient(0, fl.y, 0, nl.y);
+    grad.addColorStop(0, '#0d6156');
+    grad.addColorStop(0.55, '#0a5149');
+    grad.addColorStop(1, '#073d38');
+    c.fillStyle = grad;
+    c.beginPath();
+    c.moveTo(fl.x, fl.y); c.lineTo(fr.x, fr.y);
+    c.lineTo(nr.x, nr.y); c.lineTo(nl.x, nl.y);
+    c.closePath(); c.fill();
+
+    // 高光
+    c.save();
+    c.globalAlpha = 0.06;
+    const sh = c.createLinearGradient(fl.x, fl.y, nr.x, nr.y);
+    sh.addColorStop(0, 'rgba(255,255,255,.8)');
+    sh.addColorStop(0.45, 'rgba(255,255,255,0)');
+    c.fillStyle = sh;
+    c.beginPath();
+    c.moveTo(fl.x, fl.y); c.lineTo(fr.x, fr.y);
+    c.lineTo(nr.x, nr.y); c.lineTo(nl.x, nl.y);
+    c.closePath(); c.fill();
+    c.restore();
+
+    // 白线
+    c.save();
+    c.strokeStyle = 'rgba(226, 255, 248, .78)';
+    c.lineWidth = Math.max(1, V.W * 0.0035);
+    c.beginPath();
+    c.moveTo(fl.x, fl.y); c.lineTo(fr.x, fr.y);
+    c.lineTo(nr.x, nr.y); c.lineTo(nl.x, nl.y); c.closePath();
+    c.stroke();
+    // 中线
+    const t0 = proj(0, 0), t1 = proj(0, 1);
+    c.globalAlpha = 0.45;
+    c.beginPath(); c.moveTo(t0.x, t0.y); c.lineTo(t1.x, t1.y); c.stroke();
+    c.restore();
+
+    // 台面文字
+    c.save();
+    c.globalAlpha = 0.1;
+    c.fillStyle = '#d8fff7';
+    c.textAlign = 'center';
+    c.font = `800 ${Math.max(12, V.W * 0.07)}px system-ui, sans-serif`;
+    c.fillText('ARC', g.cx, proj(0, 0.74).y);
+    c.restore();
+  }
+
+  function drawNet() {
+    const c = V.ctx;
+    const NH = 0.1525;
+    const top = [], bot = [];
+    const N = 20;
+    for (let i = 0; i <= N; i++) {
+      const x = -1 + (2 * i) / N;
+      top.push(proj(x, 0.5, NH));
+      bot.push(proj(x, 0.5, 0));
+    }
+    c.save();
+    // 网面
+    c.beginPath();
+    c.moveTo(top[0].x, top[0].y);
+    for (let i = 1; i <= N; i++) c.lineTo(top[i].x, top[i].y);
+    for (let i = N; i >= 0; i--) c.lineTo(bot[i].x, bot[i].y);
+    c.closePath();
+    c.fillStyle = 'rgba(205, 235, 255, .17)';
+    c.fill();
+
+    // 网格
+    c.strokeStyle = 'rgba(215, 240, 255, .24)';
+    c.lineWidth = 0.7;
+    for (let i = 0; i <= N; i += 2) {
+      c.beginPath(); c.moveTo(top[i].x, top[i].y); c.lineTo(bot[i].x, bot[i].y); c.stroke();
+    }
+    for (let k = 1; k <= 3; k++) {
+      const z = (NH * k) / 4;
+      c.beginPath();
+      for (let i = 0; i <= N; i++) {
+        const p = proj(-1 + (2 * i) / N, 0.5, z);
+        if (i === 0) c.moveTo(p.x, p.y); else c.lineTo(p.x, p.y);
+      }
+      c.stroke();
+    }
+
+    // 上沿白边
+    c.strokeStyle = 'rgba(240, 252, 255, .9)';
+    c.lineWidth = Math.max(1.4, V.W * 0.004);
+    c.beginPath();
+    for (let i = 0; i <= N; i++) {
+      if (i === 0) c.moveTo(top[i].x, top[i].y); else c.lineTo(top[i].x, top[i].y);
+    }
+    c.stroke();
+
+    // 网柱
+    c.strokeStyle = 'rgba(225, 245, 255, .8)';
+    c.lineWidth = Math.max(2, V.W * 0.006);
+    c.beginPath();
+    const pl = proj(-1.01, 0.5, 0), plt = proj(-1.01, 0.5, NH);
+    c.moveTo(pl.x, pl.y); c.lineTo(plt.x, plt.y);
+    const pr = proj(1.01, 0.5, 0), prt = proj(1.01, 0.5, NH);
+    c.moveTo(pr.x, pr.y); c.lineTo(prt.x, prt.y);
+    c.stroke();
+    c.restore();
+  }
+
+  function drawPlayer(side, t) {
+    const c = V.ctx;
+    const p = V.players[side];
+    const a = anchor(side, p.x);
+    const near = a.near;
+    const h = a.h;
+    const bob = Math.sin(t * 2.2 + (near ? 0 : 1.4)) * h * 0.012;
+    const feetY = a.feetY + bob;
+    const hipY = feetY - h * 0.42;
+    const shoulderY = feetY - h * 0.76;
+    const headR = h * 0.088;
+    const headY = feetY - h * 0.865;
+
+    const jersey = near ? '#1cc3aa' : '#f45c6e';
+    const jerseyDark = near ? '#0d8d7c' : '#b53b4c';
+    const skin = near ? '#f0c7a4' : '#dba57d';
+    const hair = near ? '#141b22' : '#1b1414';
+    const shorts = '#0d1826';
+
+    c.save();
+    // 影子
+    c.fillStyle = 'rgba(0,0,0,.35)';
+    c.beginPath();
+    c.ellipse(a.x, feetY + h * 0.02, h * 0.23, h * 0.05, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // 腿
+    c.strokeStyle = '#0a121d';
+    c.lineWidth = Math.max(4, h * 0.075);
+    c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(a.x - h * 0.075, hipY);
+    c.lineTo(a.x - h * 0.14, feetY);
+    c.moveTo(a.x + h * 0.075, hipY);
+    c.lineTo(a.x + h * 0.14, feetY);
+    c.stroke();
+
+    // 鞋
+    c.strokeStyle = '#dcecff';
+    c.lineWidth = Math.max(2, h * 0.022);
+    c.beginPath();
+    c.moveTo(a.x - h * 0.19, feetY + h * 0.006);
+    c.lineTo(a.x - h * 0.10, feetY + h * 0.006);
+    c.moveTo(a.x + h * 0.10, feetY + h * 0.006);
+    c.lineTo(a.x + h * 0.19, feetY + h * 0.006);
+    c.stroke();
+
+    // 短裤
+    c.fillStyle = shorts;
+    roundRect(c, a.x - h * 0.12, hipY - h * 0.06, h * 0.24, h * 0.17, h * 0.04);
+    c.fill();
+
+    // 躯干
+    const tw = h * 0.28, th = h * 0.30;
+    const jerseyGrad = c.createLinearGradient(a.x - tw / 2, shoulderY, a.x + tw / 2, shoulderY + th);
+    jerseyGrad.addColorStop(0, jersey);
+    jerseyGrad.addColorStop(1, jerseyDark);
+    c.fillStyle = jerseyGrad;
+    roundRect(c, a.x - tw / 2, shoulderY, tw, th, h * 0.055);
+    c.fill();
+
+    // 背号
+    c.fillStyle = near ? 'rgba(4, 30, 27, .55)' : 'rgba(60, 8, 16, .5)';
+    c.font = `800 ${h * 0.13}px system-ui, sans-serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(near ? '7' : '1', a.x, shoulderY + th * 0.48);
+
+    // 手臂与球拍
+    const swing = Math.sin(clamp(p.swing, 0, 1) * Math.PI);
+    const isRight = true;
+    const dir = isRight ? 1 : -1;
+    const shX = a.x + dir * tw * 0.45;
+    const handBaseX = a.x + dir * (tw * 0.62 + h * 0.05);
+    const handBaseY = shoulderY + th * 0.52;
+    const handX = handBaseX + dir * swing * h * 0.16;
+    const handY = handBaseY - swing * h * 0.20 + (near ? 0 : h * 0.03);
+
+    // 非持拍手
+    c.strokeStyle = skin;
+    c.lineWidth = Math.max(2.5, h * 0.045);
+    c.beginPath();
+    c.moveTo(a.x - dir * tw * 0.45, shoulderY + h * 0.05);
+    c.lineTo(a.x - dir * (tw * 0.62 + h * 0.03), shoulderY + th * 0.62);
+    c.stroke();
+
+    // 持拍手
+    c.beginPath();
+    c.moveTo(shX, shoulderY + h * 0.05);
+    c.lineTo(handX, handY);
+    c.stroke();
+
+    // 球拍
+    const pr = h * 0.078;
+    c.save();
+    c.translate(handX, handY);
+    c.rotate((-0.5 + swing * 0.9) * dir);
+    // 拍柄
+    c.fillStyle = '#3a2416';
+    roundRect(c, -pr * 0.15, pr * 0.52, pr * 0.3, pr * 1.05, 1.4);
+    c.fill();
+    // 拍面
+    c.fillStyle = near ? '#d33c50' : '#303b4d';
+    c.beginPath();
+    c.arc(0, 0, pr, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = 'rgba(8, 12, 18, .85)';
+    c.lineWidth = Math.max(1, pr * 0.18);
+    c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.3)';
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.arc(-pr * 0.15, -pr * 0.15, pr * 0.55, Math.PI, Math.PI * 1.6);
+    c.stroke();
+    c.restore();
+
+    // 头
+    c.fillStyle = skin;
+    c.beginPath();
+    c.arc(a.x, headY, headR, 0, Math.PI * 2);
+    c.fill();
+
+    // 头发
+    c.fillStyle = hair;
+    c.beginPath();
+    c.arc(a.x, headY - headR * 0.22, headR * 0.98, Math.PI * 1.02, Math.PI * 1.98);
+    c.fill();
+    if (!near) {
+      // 面部
+      c.fillStyle = 'rgba(20, 15, 12, .7)';
+      c.beginPath(); c.arc(a.x - headR * 0.32, headY + headR * 0.1, headR * 0.1, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(a.x + headR * 0.32, headY + headR * 0.1, headR * 0.1, 0, Math.PI * 2); c.fill();
+    }
+
+    c.restore();
+  }
+
+  function drawBallAndTrail() {
+    const c = V.ctx;
+    const a = V.anim;
+    if (!a) return;
+    const ball = ballAt(a.elapsed);
+    if (!ball || a.elapsed > a.total + 0.1) return;
+
+    // 影子
+    if (ball.worldY >= -0.1 && ball.worldY <= 1.1 && Math.abs(ball.worldX) <= 1.1) {
+      const sh = proj(ball.worldX, ball.worldY, 0);
+      const k = clamp(1 - ball.z * 1.6, 0.2, 1);
+      c.save();
+      c.globalAlpha = 0.28 * k;
+      c.fillStyle = '#000';
+      c.beginPath();
+      c.ellipse(sh.x, sh.y, ball.r * 1.15 * k, ball.r * 0.5 * k, 0, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
+
+    // 拖尾（一条渐隐的弧线 + 少量光点）
+    c.save();
+    if (V.trail.length > 2) {
+      c.strokeStyle = 'rgba(255, 209, 92, .22)';
+      c.lineWidth = 2;
+      c.lineCap = 'round';
+      c.beginPath();
+      for (let i = 0; i < V.trail.length; i++) {
+        const tr = V.trail[i];
+        if (i === 0) c.moveTo(tr.x, tr.y); else c.lineTo(tr.x, tr.y);
+      }
+      c.stroke();
+    }
+    for (let i = 0; i < V.trail.length; i += 2) {
+      const tr = V.trail[i];
+      const alpha = (tr.life / tr.max) * 0.22 * ((i + 1) / V.trail.length);
+      c.globalAlpha = alpha;
+      c.fillStyle = '#ffd15c';
+      c.beginPath();
+      c.arc(tr.x, tr.y, tr.r * 0.45, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
+
+    // 球
+    c.save();
+    const grd = c.createRadialGradient(ball.x - ball.r * 0.35, ball.y - ball.r * 0.35, ball.r * 0.1, ball.x, ball.y, ball.r * 1.1);
+    grd.addColorStop(0, '#fff9dd');
+    grd.addColorStop(0.55, '#ffd15c');
+    grd.addColorStop(1, '#e09a19');
+    c.fillStyle = grd;
+    c.beginPath();
+    c.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = 'rgba(120, 70, 0, .28)';
+    c.lineWidth = 0.7;
+    c.stroke();
+    c.restore();
+  }
+
+  function drawParticles() {
+    const c = V.ctx;
+    c.save();
+    for (const p of V.particles) {
+      const alpha = clamp(p.life / (p.max || 0.6), 0, 1);
+      if (p.confetti) {
+        c.globalAlpha = alpha;
+        c.fillStyle = p.c;
+        c.fillRect(p.x, p.y, p.r * 2, p.r * 1.2);
+      } else {
+        c.globalAlpha = alpha * 0.45;
+        c.fillStyle = p.c + alpha + ')';
+        c.beginPath();
+        c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        c.fill();
+      }
+    }
+    c.restore();
+  }
+
+  window.Court = {
+    init: initCanvas,
+    start,
+    stop,
+    resize,
+    playPoint,
+    setSpeed: (s) => { V.speed = s; },
+    celebrate,
+    resetPlayers: () => {
+      V.players.A = { x: 0, tx: 0, swing: 0 };
+      V.players.B = { x: 0, tx: 0, swing: 0 };
+      V.trail = [];
+    }
+  };
+})();
+
+</script>
+<script>
+/* 弧光乒乓 · 界面与流程 */
+(function () {
+  'use strict';
+
+  const TT = window.TT;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const clamp = TT.clamp;
+  const fmt = (n) => Math.round(n).toLocaleString('zh-CN');
+  const SAVE_KEY = 'arc-tt-save-v1';
+  const SETTINGS_KEY = 'arc-tt-settings-v1';
+
+  /* ---------------- 音效 ---------------- */
+  const Sound = {
+    enabled: true, ctx: null,
+    init() {
+      if (!this.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        try { this.ctx = new AC(); } catch (e) { return; }
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    },
+    tone(freq, dur, type, vol, delay) {
+      if (!this.enabled || !this.ctx) return;
+      const t0 = this.ctx.currentTime + (delay || 0);
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol || 0.05, t0 + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.02);
+    },
+    hit(kind) {
+      const f = kind === 'smash' ? 1180 : kind === 'serve' ? 820 : kind === 'chop' ? 520 : 940;
+      this.tone(f, 0.045, 'triangle', 0.045);
+      this.tone(f * 0.5, 0.03, 'square', 0.018);
+    },
+    bounce() { this.tone(260, 0.05, 'sine', 0.04); },
+    point(win) {
+      if (win) { this.tone(660, 0.09, 'triangle', 0.05); this.tone(880, 0.12, 'triangle', 0.04, 0.07); }
+      else { this.tone(300, 0.1, 'sine', 0.04); this.tone(220, 0.14, 'sine', 0.035, 0.07); }
+    },
+    game() { this.tone(523, 0.1, 'triangle', 0.05); this.tone(784, 0.16, 'triangle', 0.045, 0.09); },
+    win() {
+      [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.22, 'triangle', 0.05, i * 0.11));
+    },
+    lose() {
+      [392, 330, 262].forEach((f, i) => this.tone(f, 0.24, 'sine', 0.045, i * 0.13));
+    }
+  };
+
+  window.Sound = Sound;
+
+  /* ---------------- 状态 ---------------- */
+  const App = {
+    state: null, view: 'hub', pending: {}, openPlayer: null,
+    pre: { playerId: null, tactic: null, opponent: null },
+    match: null, meta: null, phase: 'idle', speed: 1,
+    abort: false, resultShown: false, gameOverResolve: null,
+    toastTimer: null, lastWeekly: null, resultData: null
+  };
+
+  /* ---------------- 存储 ---------------- */
+  function save() {
+    if (!App.state) return;
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(App.state)); } catch (e) { /* ignore */ }
+  }
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || s.v !== 1 || !Array.isArray(s.players)) return null;
+      s.results = Array.isArray(s.results) ? s.results : [];
+      s.facilities = s.facilities || { gym: 1, physio: 1, data: 1 };
+      s.maxWeek = s.maxWeek || 8;
+      s.seed = s.seed || 20261122;
+      return s;
+    } catch (e) { return null; }
+  }
+  function loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      if (typeof s.sound === 'boolean') Sound.enabled = s.sound;
+    } catch (e) { /* ignore */ }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ sound: Sound.enabled })); } catch (e) { /* ignore */ }
+  }
+
+  function startFromSave(s) {
+    App.state = s;
+    if (App.state.pendingWeek) {
+      TT.advanceWeek(App.state, Math.random);
+      App.state.pendingWeek = false;
+      save();
+    }
+    App.view = 'hub';
+    App.pending = {};
+    if (App.state.seasonOver) {
+      showMain();
+      showSeason();
+    } else {
+      showMain();
+      setView('hub');
+    }
+  }
+
+  function startNew() {
+    App.state = TT.newGame();
+    App.view = 'hub';
+    App.pending = {};
+    App.openPlayer = null;
+    App.pre = { playerId: null, tactic: null, opponent: null };
+    save();
+    showMain();
+    setView('hub');
+    setTimeout(() => {
+      openModal(`
+        <h3>欢迎来到弧光俱乐部</h3>
+        <div class="m-sub">你接手了一支只有四名球员的小俱乐部。</div>
+        <ul class="help-list">
+          <li>每周先安排<b>训练</b>，再准备周末的比赛。体能低的球员容易失误、受伤。</li>
+          <li>比赛是 11 分制，三局两胜；第 8 周决赛为五局三胜。</li>
+          <li>临场使用<b>抢攻 / 稳守 / 暂停 / 爆发</b>改变走势。</li>
+          <li>奖金可以升级训练中心、康复中心和数据球探。</li>
+        </ul>
+        <button class="btn btn-primary" data-action="close-modal">开始经营</button>
+      `);
+    }, 180);
+  }
+
+  /* ---------------- 界面切换 ---------------- */
+  function showScreen(name) {
+    $('#titleScreen').classList.toggle('hidden', name !== 'title');
+    $('#mainScreen').classList.toggle('hidden', name !== 'main');
+    $('#prematchScreen').classList.toggle('hidden', name !== 'prematch');
+    $('#matchScreen').classList.toggle('hidden', name !== 'match');
+    $('#seasonScreen').classList.toggle('hidden', name !== 'season');
+  }
+  function showMain() { showScreen('main'); renderTop(); }
+  function setView(v) {
+    if (App.state && App.state.seasonOver && v !== 'hub') {
+      toast('赛季已经结束，先查看总结或开启新赛季');
+      v = 'hub';
+    }
+    App.view = v;
+    render();
+    const view = $('#view');
+    if (view) view.scrollTop = 0;
+  }
+
+  function renderTop() {
+    const s = App.state;
+    if (!s) return;
+    $('#topClub').textContent = s.clubName;
+    const weekText = s.seasonOver
+      ? `第 ${s.season} 赛季 · 赛季结束`
+      : `第 ${s.season} 赛季 · 第 ${s.week}/${s.maxWeek} 周`;
+    $('#topWeek').textContent = weekText;
+    $('#topMoney').textContent = '¥' + fmt(s.money);
+    $('#topRep').textContent = `声望 ${s.rep}`;
+    $('#soundBtn').textContent = Sound.enabled ? '🔊' : '🔇';
+  }
+
+  function render() {
+    if (!App.state) return;
+    renderTop();
+    $$('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === App.view));
+    const view = $('#view');
+    if (!view) return;
+    if (App.view === 'hub') view.innerHTML = renderHub();
+    else if (App.view === 'train') view.innerHTML = renderTrain();
+    else if (App.view === 'facility') view.innerHTML = renderFacility();
+    else if (App.view === 'schedule') view.innerHTML = renderSchedule();
+  }
+
+  function renderKeepScroll(fn) {
+    const view = $('#view');
+    const top = view ? view.scrollTop : 0;
+    fn();
+    if (view) view.scrollTop = top;
+  }
+
+  /* ---------------- 通用片段 ---------------- */
+  const AV_CLASS = ['', 'b', 'c', 'd'];
+  function avatar(p, i) {
+    return `<div class="player-avatar ${AV_CLASS[i % 4] || ''}">${p.name.slice(-1)}</div>`;
+  }
+  function staminaBar(v, cls) {
+    const lvl = v < 20 ? 'crit' : v < 40 ? 'low' : '';
+    return `<div class="bar hp ${lvl} ${cls || ''}"><i style="width:${clamp(v, 0, 100)}%"></i></div>`;
+  }
+  function styleChip(p) { return `<span class="chip">${TT.STYLE_LABEL[p.style] || p.style}</span>`; }
+  function formArrow(f) { return f > 1.01 ? '状态 ↗' : f < 0.99 ? '状态 ↘' : '状态 →'; }
+  function injuryChip(p) { return p.injury > 0 ? `<span class="chip red">伤病 ${p.injury} 周</span>` : ''; }
+  function formatText(week) { return week === 8 ? '五局三胜' : '三局两胜'; }
+  function formatLabel(n) { return n === 5 ? '五局三胜' : '三局两胜'; }
+
+  function bestPlayer() {
+    const fit = App.state.players.filter((p) => p.injury === 0);
+    const pool = fit.length ? fit : App.state.players;
+    return pool.slice().sort((a, b) =>
+      (TT.overall(b) * 0.65 + b.stamina * 0.35) - (TT.overall(a) * 0.65 + a.stamina * 0.35)
+    )[0];
+  }
+
+  /* ---------------- 俱乐部首页 ---------------- */
+  function renderHub() {
+    const s = App.state;
+    if (s.seasonOver) {
+      return `
+        <div class="hero">
+          <div class="hero-top"><span class="hero-tag">SEASON COMPLETE</span><span class="hero-week">第 ${s.season} 赛季</span></div>
+          <div style="margin-top:14px"><h3 style="margin:0;font-size:24px">赛季已经结束</h3>
+          <p class="muted" style="font-size:12px;line-height:1.7">查看赛季总结，或者开启下一个赛季继续带队。</p></div>
+          <div class="hero-actions"><button class="btn btn-primary" data-action="season-summary">查看总结</button></div>
+        </div>
+        ${rosterBlock(s)}
+      `;
+    }
+    const opp = TT.getOpponent(s, s.week);
+    const lv = TT.facilityLevel(s, 'data');
+    const fmtText = formatText(s.week);
+    const weekLabel = s.week === 8 ? '总决赛' : `第 ${s.week} 站`;
+    const noTrain = !s.weekTrained;
+    return `
+      <div class="hero">
+        <div class="hero-top">
+          <span class="hero-tag">${opp.tag}</span>
+          <span class="hero-week">${weekLabel} · ${fmtText}</span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-ovr"><b>${TT.overall(opp)}</b><small>OVR</small></div>
+          <div class="hero-opp">
+            <h3>${opp.name}</h3>
+            <p>${opp.club} · ${opp.nat} · ${opp.age} 岁</p>
+            <div class="flags">
+              ${lv >= 2 ? `<span class="chip on">${TT.STYLE_LABEL[opp.style]}</span>` : `<span class="chip">打法未知</span>`}
+              <span class="chip">${fmtText}</span>
+              ${noTrain ? `<span class="chip gold">本周尚未训练</span>` : `<span class="chip on">训练完成</span>`}
+            </div>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-action="prepare">赛前准备</button>
+          <button class="btn btn-ghost" data-action="tab" data-tab="train">${s.weekTrained ? '查看训练' : '安排训练'}</button>
+        </div>
+      </div>
+
+      <div class="quickstats">
+        <div class="qstat"><small>赛季战绩</small><b>${s.wins} 胜 ${s.losses} 负</b></div>
+        <div class="qstat"><small>俱乐部声望</small><b>${s.rep}</b></div>
+        <div class="qstat"><small>可用资金</small><b>¥${fmt(s.money)}</b></div>
+      </div>
+
+      ${rosterBlock(s)}
+
+      <div class="section-head"><h2>教练笔记</h2></div>
+      <div class="card" style="padding:14px;font-size:12px;line-height:1.75;color:#b9cce6">
+        ${s.week === 1 ? '第一站是热身赛，先让队员找找手感。赛前记得安排训练。' :
+          s.week <= 4 ? '前四站是积分赛，稳扎稳打。体能不足时，换一名生力军出场。' :
+          s.week <= 6 ? '对手开始变强，善用战术克制和教练指令，别让他们把节奏带走。' :
+          s.week === 7 ? '大满贯赛，世界排名第 4 的王楚钦。削球手或许能打乱他的连续弧圈。' :
+          '决赛，五局三胜。面对世界第一，把暂停和爆发留到最关键的分。'}
+        <br><span class="muted">提示：${['快攻','削球','弧圈','控制','搏杀'][0]}系球员安排对应主项训练成长更快。</span>
+      </div>
+    `;
+  }
+
+  function rosterBlock(s) {
+    return `
+      <div class="section-head"><h2>阵容</h2><small>${s.players.length} 名球员 · 每周每人一次训练</small></div>
+      <div class="roster">
+        ${s.players.map((p, i) => `
+          <div class="player-row">
+            ${avatar(p, i)}
+            <div class="player-main">
+              <div class="player-name">
+                <b>${p.name}</b>${styleChip(p)}${injuryChip(p)}
+              </div>
+              <div class="player-sub">
+                <span>${p.age} 岁 · 潜力 ${p.potential}</span><span>士气 ${Math.round(p.morale)}</span><span>${formArrow(p.form)}</span>
+              </div>
+              <div class="stamina-line">
+                ${staminaBar(p.stamina)}
+                <span>${Math.round(p.stamina)}</span>
+              </div>
+            </div>
+            <div class="ovr-badge"><b>${TT.overall(p)}</b><small>OVR</small></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  /* ---------------- 训练 ---------------- */
+  function renderTrain() {
+    const s = App.state;
+    const block = s.weekTrained
+      ? `<div class="train-intro"><span>✅</span><div><b>本周训练已完成。</b><br>前往赛前准备，或先升级设施。</div></div>`
+      : `<div class="train-intro"><span>🏓</span><div><b>每名球员安排一个项目。</b><br>训练消耗体能；体能低于 35 时收益下降，低于 10 有受伤风险。</div></div>`;
+
+    return `
+      ${block}
+      <div class="section-head"><h2>本周安排</h2>${s.weekTrained ? '' : '<button class="btn btn-sm" data-action="auto-train">按打法自动安排</button>'}</div>
+      ${s.players.map((p, i) => {
+        const open = App.openPlayer === p.id;
+        const picked = App.pending[p.id];
+        const prog = picked ? TT.PROGRAMS[picked] : null;
+        return `
+          <div class="card train-card ${open ? 'open' : ''}">
+            <div class="train-head" data-action="toggle-player" data-pid="${p.id}">
+              ${avatar(p, i)}
+              <div class="player-main">
+                <div class="player-name"><b>${p.name}</b>${styleChip(p)}${injuryChip(p)}</div>
+                <div class="player-sub">
+                  <span>${prog ? `已选：${prog.name}` : '未安排（默认休息）'}</span>
+                  <span>体能 ${Math.round(p.stamina)}</span>
+                </div>
+              </div>
+              <div class="ovr-badge"><b>${TT.overall(p)}</b><small>OVR</small></div>
+              <span class="chev">›</span>
+            </div>
+            ${open ? `
+              <div class="train-detail">
+                <div class="program-grid">
+                  ${Object.values(TT.PROGRAMS).map((pr) => programButton(p, pr, picked)).join('')}
+                </div>
+              </div>` : ''}
+          </div>
+        `;
+      }).join('')}
+      ${s.weekTrained
+        ? `<div class="training-actions"><button class="btn btn-primary btn-block" data-action="prepare">前往赛前准备</button></div>`
+        : `<div class="training-actions">
+            <button class="btn btn-primary btn-block" data-action="apply-training">确认本周训练</button>
+            <div class="tiny muted" style="text-align:center;margin-top:7px">未安排的球员将自动休息</div>
+          </div>`}
+      <div style="height:10px"></div>
+    `;
+  }
+
+  function programButton(p, pr, picked) {
+    const sel = picked === pr.key;
+    const disabled = p.injury > 0 || App.state.weekTrained;
+    let cost = '';
+    if (pr.rest) {
+      cost = `<span>体能 +${pr.stamina}</span><span>士气 +${pr.morale}</span>`;
+    } else {
+      cost = `<span class="neg">体能 ${pr.stamina}</span><span>+${TT.STAT_LABEL[pr.stat]}</span>`;
+    }
+    return `
+      <button class="program ${sel ? 'selected' : ''}" data-action="pick-program" data-pid="${p.id}" data-program="${pr.key}" ${disabled ? 'disabled' : ''}>
+        <b>${pr.name}<em>${pr.rest ? '恢复' : '主项'}</em></b>
+        <small>${pr.desc}</small>
+        <div class="cost">${cost}</div>
+      </button>
+    `;
+  }
+
+  function applyTraining() {
+    const s = App.state;
+    if (!s || s.weekTrained) return;
+    const lines = [];
+    for (const p of s.players) {
+      const key = App.pending[p.id] || 'rest';
+      const r = TT.trainPlayer(s, p.id, key, Math.random);
+      if (!r.ok) { lines.push(`${p.name}：${r.msg}`); continue; }
+      if (r.rest) {
+        lines.push(`${p.name}：休息调整，体能 +${TT.PROGRAMS.rest.stamina}`);
+      } else if (r.gains && r.gains.length) {
+        const g = r.gains[0];
+        lines.push(`${p.name}：${r.program}，${g.label} +${g.n}${r.injury ? '（受伤）' : ''}`);
+      } else {
+        lines.push(`${p.name}：${r.program}，完成训练${r.tired ? '（疲劳，收益下降）' : ''}`);
+      }
+      if (r.injury) lines.push(`⚠ ${p.name} 训练中受伤，将缺席 1-2 周`);
+    }
+    s.weekTrained = true;
+    App.pending = {};
+    App.openPlayer = null;
+    save();
+    render();
+    openModal(`
+      <h3>本周训练完成</h3>
+      <div class="m-sub">状态会保留到比赛结束</div>
+      ${lines.map((l) => `<div class="report-line"><span>${l}</span></div>`).join('')}
+      <button class="btn btn-primary" data-action="prepare">前往赛前准备</button>
+      <button class="btn btn-ghost" data-action="close-modal">留在这里</button>
+    `);
+  }
+
+  /* ---------------- 设施 ---------------- */
+  function renderFacility() {
+    const s = App.state;
+    return `
+      <div class="train-intro"><span>🏗️</span><div><b>设施决定训练上限。</b><br>资金来自赞助、奖金和声望。升级会立即生效。</div></div>
+      <div class="tiny muted" style="margin:0 2px 10px">当前资金 <b style="color:var(--orange)">¥${fmt(s.money)}</b></div>
+      ${Object.values(TT.FACILITIES).map((f) => {
+        const lv = TT.facilityLevel(s, f.key);
+        const max = lv >= f.max;
+        const cost = max ? 0 : f.costs[lv];
+        const can = !max && s.money >= cost;
+        return `
+          <div class="card facility">
+            <div class="facility-head">
+              <div class="facility-icon">${f.icon}</div>
+              <div class="facility-title">
+                <b>${f.name}</b>
+                <small>${f.effect(lv)}${max ? '' : `　→　${f.effect(lv + 1)}`}</small>
+                <div class="level-pips">${[1, 2, 3].map((n) => `<i class="${n <= lv ? 'on' : ''}"></i>`).join('')}</div>
+              </div>
+            </div>
+            <div class="facility-foot">
+              <div class="price">${max ? '<span class="chip on">已满级</span>' : `升级费用 <b>¥${fmt(cost)}</b>`}</div>
+              <button class="btn btn-sm ${can ? 'btn-warn' : ''}" data-action="upgrade" data-key="${f.key}" ${can ? '' : 'disabled'}>
+                ${max ? '满级' : `升级 Lv.${lv + 1}`}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+      <div class="tiny muted" style="text-align:center;margin-top:10px">训练中心影响成长，康复中心影响每周恢复，数据球探影响赛前情报。</div>
+    `;
+  }
+
+  /* ---------------- 赛程 ---------------- */
+  function renderSchedule() {
+    const s = App.state;
+    const rows = [];
+    for (let w = 1; w <= s.maxWeek; w++) {
+      const opp = TT.getOpponent(s, w);
+      const res = s.results.find((r) => r.week === w);
+      let cls = '', right = '', sub = '';
+      if (res) {
+        cls = `done ${res.win ? 'win' : 'loss'}`;
+        right = `<b>${res.win ? '胜' : '负'}</b><small>${res.score}</small>`;
+        sub = res.win ? '已结束' : '已结束';
+      } else if (w === s.week && !s.seasonOver) {
+        cls = 'now';
+        right = `<span class="chip gold">本轮</span>`;
+        sub = '待赛';
+      } else {
+        cls = 'locked';
+        right = `<span class="chip">待赛</span>`;
+        sub = '未开始';
+      }
+      rows.push(`
+        <div class="round ${cls}">
+          <div class="week-no">W${w}</div>
+          <div class="r-main">
+            <b>${opp.name}</b>
+            <small>${opp.tag} · ${formatText(w)} · ${sub}</small>
+          </div>
+          <div class="r-res">${right}</div>
+        </div>
+      `);
+    }
+    return `
+      <div class="train-intro"><span>📅</span><div><b>八周赛季，一站比一站强。</b><br>第 8 周为五局三胜的总决赛。赛季胜场决定评级。</div></div>
+      ${rows.join('')}
+      <div class="tiny muted" style="text-align:center;margin-top:8px">对手数据参考 ITTF 2026 年第 46 周世界排名，数值经游戏平衡压缩。</div>
+    `;
+  }
+
+  /* ---------------- 赛前 ---------------- */
+  function enterPrematch() {
+    const s = App.state;
+    if (!s || s.seasonOver) return;
+    const fit = s.players.filter((x) => x.injury === 0);
+    if (!fit.length) {
+      openModal(`
+        <h3>无人可以出场</h3>
+        <p class="muted" style="font-size:12px">四名球员都在伤病恢复中。本周只能弃权，让队员安心养伤。</p>
+        <button class="btn btn-warn" data-action="skip-week">本周弃权</button>
+        <button class="btn btn-ghost" data-action="close-modal">再等等</button>
+      `);
+      return;
+    }
+    const opp = TT.getOpponent(s, s.week);
+    App.pre.opponent = opp;
+    let p = s.players.find((x) => x.id === App.pre.playerId);
+    if (!p || p.injury > 0) p = bestPlayer();
+    App.pre.playerId = p.id;
+    if (!App.pre.tactic) App.pre.tactic = p.style;
+    App.pre.format = s.week === 8 ? 5 : 3;
+    renderPrematch();
+    showScreen('prematch');
+  }
+
+  function renderPrematch() {
+    const s = App.state;
+    const opp = App.pre.opponent;
+    if (!opp) return;
+    const dataLv = TT.facilityLevel(s, 'data');
+    const p = s.players.find((x) => x.id === App.pre.playerId) || bestPlayer();
+    const weakKey = TT.STAT_KEYS.slice().sort((a, b) => opp.stats[a] - opp.stats[b])[0];
+    const fmtText = formatText(s.week);
+    $('#preFormat').textContent = fmtText;
+
+    const body = $('#prematchBody');
+    body.innerHTML = `
+      <div class="opp-banner">
+        <div class="opp-ovr"><b>${TT.overall(opp)}</b><small>OPPONENT OVR</small></div>
+        <div class="opp-info">
+          <h3>${opp.name}</h3>
+          <p>${opp.club} · ${opp.nat} · ${opp.age} 岁</p>
+          <div class="flags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">
+            ${dataLv >= 2 ? `<span class="chip on">${TT.STYLE_LABEL[opp.style]}</span>` : `<span class="chip">打法未知</span>`}
+            <span class="chip">${opp.tag}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scout">
+        ${dataLv >= 3 ? `
+          <b>球探报告 · 弱点：${TT.STAT_LABEL[weakKey]} ${opp.stats[weakKey]}</b><br>
+          针对该弱点进攻，本场攻击 <span class="weak">+3</span>。
+          <div class="scout-stats">
+            ${TT.STAT_KEYS.map((k) => `<div class="scout-stat">${TT.STAT_LABEL[k]}<b>${opp.stats[k]}</b></div>`).join('')}
+          </div>
+        ` : dataLv >= 2 ? `
+          <b>球探报告：</b>对手是 <span class="weak">${TT.STYLE_LABEL[opp.style]}</span> 型打法。${TT.STYLE_DESC[opp.style]}<br>
+          <span class="muted">升级数据球探到 Lv.3 可查看具体弱点。</span>
+        ` : `
+          <b>球探报告：</b>数据球探等级不足，只能确认对手总评 <span class="weak">${TT.overall(opp)}</span>。<br>
+          <span class="muted">升级“数据球探”可查看打法，Lv.3 可查看弱点并获得攻击加成。</span>
+        `}
+      </div>
+
+      <div class="section-head"><h2>出场球员</h2><small>体能影响移动和失误率</small></div>
+      <div class="lineup">
+        ${s.players.map((pl, i) => {
+          const sel = pl.id === p.id;
+          return `
+            <button class="pick ${sel ? 'sel' : ''} ${pl.injury > 0 ? 'injured' : ''}" data-action="pick-player" data-pid="${pl.id}" ${pl.injury > 0 ? 'disabled' : ''}>
+              <div class="pk-top"><b>${pl.name}</b><span>${TT.overall(pl)}</span></div>
+              <div class="pk-sub">${TT.STYLE_LABEL[pl.style]} · ${pl.injury > 0 ? `伤病 ${pl.injury} 周` : `体能 ${Math.round(pl.stamina)}`}</div>
+              ${staminaBar(pl.stamina)}
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="section-head"><h2>比赛战术</h2><small>克制：快攻→削球→弧圈→控制→快攻</small></div>
+      <div class="tactics">
+        ${Object.values(TT.TACTICS).map((t) => {
+          const key = Object.keys(TT.TACTICS).find((k) => TT.TACTICS[k] === t);
+          const sel2 = App.pre.tactic === key;
+          const counter = dataLv >= 2 && beats(key, opp.style);
+          return `
+            <button class="tactic ${sel2 ? 'sel' : ''}" data-action="pick-tactic" data-tactic="${key}">
+              <div class="t-top"><b>${t.name}</b>${counter ? '<span class="counter">克制对手</span>' : ''}</div>
+              <small>${t.desc}</small>
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="card" style="margin-top:14px;padding:13px;font-size:11px;line-height:1.7;color:#a9c0dd">
+        <b style="color:var(--text)">临场指令</b><br>
+        抢攻 / 稳守：4 分增益，冷却 5 分；暂停：每局 1 次；气势满 100 可发动爆发。
+        ${p.stamina < 30 ? `<br><span style="color:var(--orange)">警告：${p.name} 体能偏低，后程可能掉速。</span>` : ''}
+        ${!s.weekTrained ? `<br><span style="color:var(--orange)">本周尚未训练，可以直接比赛，但会错过成长。</span>` : ''}
+      </div>
+      <div style="height:8px"></div>
+    `;
+
+    const btn = $('#startMatchBtn');
+    btn.disabled = p.injury > 0;
+    btn.textContent = p.injury > 0 ? '该球员无法出场' : `与 ${opp.name} 开赛`;
+  }
+
+  function beats(a, b) {
+    const map = { fast: 'chop', chop: 'loop', loop: 'control', control: 'fast' };
+    return map[a] === b;
+  }
+
+  /* ---------------- 比赛 ---------------- */
+  function startMatch() {
+    const s = App.state;
+    const p = s.players.find((x) => x.id === App.pre.playerId);
+    const opp = App.pre.opponent;
+    if (!p || !opp || p.injury > 0) return;
+    const format = s.week === 8 ? 5 : 3;
+    const scoutBonus = TT.facilityLevel(s, 'data') >= 3 ? 3 : 0;
+    const tactic = App.pre.tactic || p.style;
+    App.match = TT.createMatch(p, opp, format, { tactic, scoutBonus });
+    App.meta = { playerId: p.id, opponent: opp, format };
+    App.speed = 1;
+    App.abort = false;
+    App.resultShown = false;
+    App.resultData = null;
+    App.phase = 'anim';
+    $('#speedBtn').textContent = '1×';
+    $('#matchResult').classList.add('hidden');
+    $('#gameOverlay').classList.add('hidden');
+    $('#matchToast').classList.remove('show');
+    showScreen('match');
+    updateMatchHUD();
+    requestAnimationFrame(() => {
+      Court.init($('#court'), App.match);
+      Court.setSpeed(App.speed);
+      runMatch();
+    });
+  }
+
+  function updateMatchHUD() {
+    const m = App.match;
+    if (!m) return;
+    $('#mNameA').textContent = m.A.name;
+    $('#mNatA').textContent = `${m.A.nat} · ${TT.STYLE_LABEL[m.A.style]}`;
+    $('#mNameB').textContent = m.B.name;
+    $('#mNatB').textContent = `${m.B.nat} · ${TT.STYLE_LABEL[m.B.style]}`;
+    $('#mPtsA').textContent = m.pointsA;
+    $('#mPtsB').textContent = m.pointsB;
+    $('#mRound').textContent = `第 ${m.game} 局 · ${formatLabel(m.format)}`;
+    const need = m.format === 5 ? 3 : 2;
+    let dots = '';
+    for (let i = 0; i < need; i++) dots += `<span class="gd ${i < m.gamesA ? 'a' : ''}"></span>`;
+    dots += `<span style="width:5px"></span>`;
+    for (let i = 0; i < need; i++) dots += `<span class="gd ${i < m.gamesB ? 'b' : ''}"></span>`;
+    $('#mGames').innerHTML = dots;
+    if (!m.over) {
+      $('#mServe').textContent = `发球：${m.server === 'A' ? m.A.name : m.B.name}`;
+    } else {
+      $('#mServe').textContent = m.winner === 'A' ? '比赛结束 · 胜利' : '比赛结束 · 惜败';
+    }
+    $('#mStamA').textContent = `体能 ${Math.round(m.A.stamina)}`;
+    $('#mStamB').textContent = `体能 ${Math.round(m.B.stamina)}`;
+    setBar('#mStamBarA', m.A.stamina);
+    setBar('#mStamBarB', m.B.stamina);
+    $('#mTacA').textContent = TT.TACTICS[m.A.tactic].name;
+    $('#mTacB').textContent = TT.TACTICS[m.B.tactic].name;
+    $('#mMomentum').style.width = m.A.momentum + '%';
+    $('#mMomentumVal').textContent = Math.round(m.A.momentum);
+    updateCoachButtons();
+  }
+
+  function setBar(sel, v) {
+    const el = $(sel);
+    if (!el) return;
+    el.style.width = clamp(v, 0, 100) + '%';
+    const bar = el.parentElement;
+    bar.classList.toggle('low', v < 35);
+    bar.classList.toggle('crit', v < 18);
+  }
+
+  function updateCoachButtons() {
+    const m = App.match;
+    if (!m) return;
+    const c = m.coach;
+    const attack = $('#cbAttack'), defend = $('#cbDefend'), timeout = $('#cbTimeout'), burst = $('#cbBurst');
+    attack.disabled = c.cooldown > 0 || m.over;
+    defend.disabled = c.cooldown > 0 || m.over;
+    timeout.disabled = c.timeouts <= 0 || m.over;
+    burst.disabled = m.A.momentum < 99 || m.over;
+    attack.querySelector('small').textContent = c.cooldown > 0 ? `冷却 ${c.cooldown} 分` : '4 分增益';
+    defend.querySelector('small').textContent = c.cooldown > 0 ? `冷却 ${c.cooldown} 分` : '4 分增益';
+    timeout.querySelector('small').textContent = c.timeouts > 0 ? '每局 1 次' : '本局已用';
+    burst.querySelector('small').textContent = m.A.momentum >= 99 ? '可发动' : `${Math.round(m.A.momentum)} 气势`;
+    burst.classList.toggle('ready', m.A.momentum >= 99);
+    attack.classList.toggle('ready', c.cooldown === 0 && !m.over);
+    defend.classList.toggle('ready', c.cooldown === 0 && !m.over);
+  }
+
+  async function runMatch() {
+    const m = App.match;
+    if (!m) return;
+    App.abort = false;
+    await sleep(420);
+    try {
+      while (!m.over) {
+        if (App.abort) return;
+        App.phase = 'anim';
+        const pt = TT.simulatePoint(m, Math.random);
+        await Court.playPoint(pt);
+        if (App.abort) return;
+        const ev = TT.applyPoint(m, pt);
+        updateMatchHUD();
+        showPointFlash(pt);
+        Sound.point(pt.winner === 'A');
+
+        if (ev.matchOver) {
+          await sleep(520);
+          if (App.abort) return;
+          finishMatchUI();
+          return;
+        }
+        if (ev.gameOver) {
+          updateMatchHUD();
+          Sound.game();
+          await showGameOver(ev);
+          if (App.abort) return;
+          TT.startNextGame(m);
+          updateMatchHUD();
+          await sleep(260);
+          continue;
+        }
+        App.phase = 'between';
+        await sleep(900);
+        if (App.abort) return;
+        const msg = TT.aiAdjust(m, Math.random);
+        if (msg) { matchToast(msg); updateMatchHUD(); }
+        App.phase = 'anim';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function showPointFlash(pt) {
+    const el = $('#pointFlash');
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.textContent = pt.winner === 'A' ? pt.reason : `失分 · ${pt.reason}`;
+    el.classList.toggle('bad', pt.winner !== 'A');
+    el.classList.add('show');
+  }
+
+  function matchToast(msg) {
+    const el = $('#matchToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(App.toastTimer);
+    App.toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function showGameOver(ev) {
+    return new Promise((resolve) => {
+      const m = App.match;
+      App.gameOverResolve = resolve;
+      $('#goTitle').textContent = `第 ${m.game} 局结束`;
+      $('#goScore').textContent = `${m.pointsA} : ${m.pointsB}`;
+      $('#goSub').textContent = ev.gameWinner === 'A'
+        ? `${m.A.name} 拿下这一局`
+        : `${m.B.name} 拿下这一局`;
+      $('#gameOverlay').classList.remove('hidden');
+    });
+  }
+
+  function finishMatchUI() {
+    if (App.resultShown) return;
+    App.resultShown = true;
+    const m = App.match;
+    const res = TT.finishMatch(App.state, m, App.meta.opponent);
+    App.state.pendingWeek = true;
+    save();
+    App.resultData = res;
+
+    const win = res.win;
+    $('#matchResultCard').innerHTML = `
+      <div class="kicker">${win ? 'VICTORY' : 'DEFEAT'}</div>
+      <h2 style="color:${win ? 'var(--teal)' : 'var(--red)'}">${win ? '胜利' : '惜败'}</h2>
+      <div class="big-score">
+        <span class="${win ? 'win' : 'lose'}">${m.gamesA}</span>
+        <span style="color:var(--muted);font-size:26px"> : </span>
+        <span>${m.gamesB}</span>
+      </div>
+      <p>${win ? `击败 ${App.meta.opponent.name}，俱乐部声望 +${res.rep}` : `${App.meta.opponent.name} 赢下了这场对决`}</p>
+      <div class="result-grid">
+        <div class="result-cell"><small>比赛奖金</small><b>¥${fmt(res.prize)}</b></div>
+        <div class="result-cell"><small>声望</small><b>+${res.rep}</b></div>
+        <div class="result-cell"><small>制胜分</small><b>${m.stats.A.winners}</b></div>
+        <div class="result-cell"><small>主动失误</small><b>${m.stats.A.errors}</b></div>
+      </div>
+      <div class="tiny muted" style="margin-top:2px">${m.A.name} 赛后体能 ${res.stamina}</div>
+      <button class="btn btn-primary" data-action="match-return">返回俱乐部</button>
+    `;
+    $('#matchResult').classList.remove('hidden');
+    Court.celebrate(win);
+    if (win) Sound.win(); else Sound.lose();
+  }
+
+  function forfeitMatch() {
+    closeModal();
+    const m = App.match;
+    if (!m || App.resultShown) return;
+    App.abort = true;
+    Court.stop();
+    m.over = true;
+    m.winner = 'B';
+    m.gamesA = 0;
+    m.gamesB = m.format === 5 ? 3 : 2;
+    $('#gameOverlay').classList.add('hidden');
+    finishMatchUI();
+  }
+
+  /* ---------------- 周结算与赛季 ---------------- */
+  function returnFromMatch() {
+    const s = App.state;
+    $('#matchResult').classList.add('hidden');
+    Court.stop();
+    showMain();
+    let wk = null;
+    if (s.pendingWeek) {
+      wk = TT.advanceWeek(s, Math.random);
+      s.pendingWeek = false;
+      save();
+    }
+    App.resultData = null;
+    if (s.seasonOver) {
+      showSeason();
+      return;
+    }
+    App.view = 'hub';
+    render();
+    if (wk) showWeekModal(wk);
+  }
+
+  function skipWeek() {
+    const s = App.state;
+    closeModal();
+    s.losses++;
+    s.results.push({ week: s.week, name: '弃权', nat: '—', score: '0:2', win: false, points: '0:0', prize: 0, rep: 0 });
+    const wk = TT.advanceWeek(s, Math.random);
+    s.pendingWeek = false;
+    save();
+    render();
+    if (s.seasonOver) showSeason();
+    else showWeekModal(wk);
+  }
+
+  function showWeekModal(wk) {
+    const s = App.state;
+    const next = TT.getOpponent(s, s.week);
+    openModal(`
+      <h3>第 ${s.week - 1} 周结算</h3>
+      <div class="m-sub">下一站：${next.name} · ${next.tag}</div>
+      <div class="report-line"><span>赞助与门票收入</span><span style="color:var(--teal)">+¥${fmt(wk.income)}</span></div>
+      <div class="report-line"><span>球员工资</span><span style="color:var(--red)">-¥${fmt(wk.wages)}</span></div>
+      <div class="report-line"><span>康复中心恢复</span><span>体能 +${wk.rec}</span></div>
+      <div class="report-line"><span>当前资金</span><b>¥${fmt(s.money)}</b></div>
+      <button class="btn btn-primary" data-action="close-modal">进入第 ${s.week} 周</button>
+    `);
+  }
+
+  function showSeason() {
+    const s = App.state;
+    const sum = TT.seasonSummary(s);
+    const gradeColor = sum.wins >= 6 ? 'var(--teal)' : sum.wins >= 4 ? 'var(--orange)' : 'var(--red)';
+    $('#seasonScreen').innerHTML = `
+      <div class="trophy">${sum.champion ? '🏆' : sum.wins >= 5 ? '🥈' : '🏓'}</div>
+      <div class="brand-kicker">SEASON ${s.season} COMPLETE</div>
+      <h1>${sum.champion ? '世界之巅' : '赛季结束'}</h1>
+      <div class="muted" style="font-size:12px">${s.clubName} · ${sum.wins} 胜 ${sum.losses} 负</div>
+      <div class="grade" style="color:${gradeColor}">${sum.grade}</div>
+      <div class="s-stats">
+        <div class="s-stat"><small>赛季胜场</small><b>${sum.wins} / ${sum.played || s.maxWeek}</b></div>
+        <div class="s-stat"><small>俱乐部声望</small><b>${sum.rep}</b></div>
+        <div class="s-stat"><small>赛季 MVP</small><b>${sum.mvp}</b></div>
+        <div class="s-stat"><small>剩余资金</small><b>¥${fmt(sum.money)}</b></div>
+      </div>
+      <p class="muted" style="font-size:12px;line-height:1.7">
+        ${sum.champion ? '你带领这支小俱乐部击败了世界第一，写下了属于自己的弧光。' :
+          sum.wins >= 5 ? '球队已经站稳脚跟。升级设施，下个赛季走得更远。' :
+          '对手越来越强，但年轻人还有成长空间。下个赛季再来。'}
+      </p>
+      <button class="btn btn-primary" data-action="season-new">开启第 ${s.season + 1} 赛季</button>
+      <button class="btn btn-ghost" data-action="back-hub" style="margin-top:9px">留在俱乐部</button>
+      <div class="title-foot" style="margin-top:14px">新赛季对手会更强，球员也会继续成长</div>
+    `;
+    showScreen('season');
+  }
+
+  function newSeason() {
+    const s = App.state;
+    TT.newSeason(s);
+    s.pendingWeek = false;
+    App.view = 'hub';
+    save();
+    showMain();
+    setView('hub');
+    toast(`第 ${s.season} 赛季开始，对手更强了`, 'good');
+  }
+
+  /* ---------------- 弹窗 / Toast ---------------- */
+  function openModal(html) {
+    $('#modalRoot').innerHTML = `<div class="modal-back"><div class="modal">${html}</div></div>`;
+  }
+  function closeModal() { $('#modalRoot').innerHTML = ''; }
+
+  function toast(msg, tone) {
+    const root = $('#toastRoot');
+    const el = document.createElement('div');
+    el.className = 'toast' + (tone ? ' ' + tone : '');
+    el.textContent = msg;
+    root.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  function showHelp() {
+    openModal(`
+      <h3>玩法说明</h3>
+      <div class="m-sub">模拟经营 + 实时球台比赛</div>
+      <ol class="help-list">
+        <li><b>一周一赛：</b>先给四名球员安排训练，再选择一名球员出战。体能低会影响移动和击球，低于 10 有受伤风险。</li>
+        <li><b>比赛规则：</b>11 分制，领先 2 分获胜；每 2 分换发，10 平后每 1 分换发。常规站三局两胜，第 8 周决赛五局三胜。</li>
+        <li><b>战术克制：</b>快攻 → 削球 → 弧圈 → 控制 → 快攻。克制方获得明显加成；搏杀风险高、收益也高。</li>
+        <li><b>临场指令：</b>抢攻 / 稳守获得 4 分增益，冷却 5 分；暂停每局 1 次，恢复体能并打断对手气势；气势满 100 可发动爆发。</li>
+        <li><b>经营：</b>奖金和声望带来收入，用来升级训练中心、康复中心、数据球探。数据球探 Lv.3 能看到对手弱点并 +3 攻击。</li>
+      </ol>
+      <div class="tiny muted">比赛数据为模拟，球员排名参考 ITTF 2026 年第 46 周榜单。</div>
+      <button class="btn btn-primary" data-action="close-modal">知道了</button>
+    `);
+  }
+
+  /* ---------------- 事件 ---------------- */
+  document.addEventListener('click', async (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    if (Sound.enabled) Sound.init();
+    const action = el.dataset.action;
+
+    if (action === 'new-game') {
+      if (loadSave() || App.state) {
+        openModal(`
+          <h3>开始新的生涯？</h3>
+          <p class="muted" style="font-size:12px">当前生涯的进度会被覆盖。</p>
+          <button class="btn btn-warn" data-action="new-game-confirm">覆盖并开始</button>
+          <button class="btn btn-ghost" data-action="close-modal">取消</button>
+        `);
+      } else startNew();
+      return;
+    }
+    if (action === 'new-game-confirm') { closeModal(); startNew(); return; }
+    if (action === 'continue') {
+      const s = loadSave();
+      if (!s) { toast('没有找到存档', 'bad'); return; }
+      closeModal();
+      startFromSave(s);
+      return;
+    }
+    if (action === 'help') { showHelp(); return; }
+    if (action === 'close-modal') { closeModal(); return; }
+    if (action === 'toggle-sound') {
+      Sound.enabled = !Sound.enabled;
+      Sound.init();
+      saveSettings();
+      $('#soundBtn').textContent = Sound.enabled ? '🔊' : '🔇';
+      toast(Sound.enabled ? '声音已开启' : '声音已关闭');
+      return;
+    }
+    if (action === 'tab') { setView(el.dataset.tab); return; }
+    if (action === 'back-hub') {
+      if (App.state && App.state.seasonOver && $('#seasonScreen').classList.contains('hidden') === false) {
+        showMain();
+        App.view = 'hub';
+        render();
+      } else {
+        showMain();
+      }
+      return;
+    }
+    if (action === 'skip-week') { skipWeek(); return; }
+    if (action === 'prepare') { closeModal(); enterPrematch(); return; }
+    if (action === 'pick-player') {
+      App.pre.playerId = el.dataset.pid;
+      renderPrematch();
+      return;
+    }
+    if (action === 'pick-tactic') {
+      App.pre.tactic = el.dataset.tactic;
+      renderPrematch();
+      return;
+    }
+    if (action === 'start-match') { startMatch(); return; }
+    if (action === 'toggle-player') {
+      App.openPlayer = App.openPlayer === el.dataset.pid ? null : el.dataset.pid;
+      renderKeepScroll(render);
+      return;
+    }
+    if (action === 'pick-program') {
+      App.pending[el.dataset.pid] = el.dataset.program;
+      renderKeepScroll(render);
+      return;
+    }
+    if (action === 'auto-train') {
+      const s = App.state;
+      if (s.weekTrained) return;
+      for (const p of s.players) {
+        if (p.injury > 0) continue;
+        App.pending[p.id] = p.style === 'fast' ? 'speed' : p.style === 'chop' ? 'defense' : p.style === 'control' ? 'mental' : 'spin';
+      }
+      renderKeepScroll(render);
+      toast('已按打法安排主项，可手动调整');
+      return;
+    }
+    if (action === 'apply-training') { applyTraining(); return; }
+    if (action === 'upgrade') {
+      const r = TT.upgradeFacility(App.state, el.dataset.key);
+      if (!r.ok) toast(r.msg, 'bad');
+      else { save(); render(); toast(`升级成功：Lv.${r.level}`, 'good'); }
+      return;
+    }
+    if (action === 'coach') {
+      if (!App.match) return;
+      const r = TT.coachAction(App.match, el.dataset.coach);
+      matchToast(r.msg);
+      updateMatchHUD();
+      return;
+    }
+    if (action === 'next-game') {
+      $('#gameOverlay').classList.add('hidden');
+      const r = App.gameOverResolve;
+      App.gameOverResolve = null;
+      if (r) r();
+      return;
+    }
+    if (action === 'leave-match') {
+      openModal(`
+        <h3>退出比赛？</h3>
+        <p class="muted" style="font-size:12px">退出将按弃权判负，并直接进入本周结算。</p>
+        <button class="btn btn-warn" data-action="forfeit-match">放弃本场</button>
+        <button class="btn btn-ghost" data-action="close-modal">继续比赛</button>
+      `);
+      return;
+    }
+    if (action === 'forfeit-match') { forfeitMatch(); return; }
+    if (action === 'match-return') { returnFromMatch(); return; }
+    if (action === 'season-summary') { showSeason(); return; }
+    if (action === 'season-new') { newSeason(); return; }
+    if (action === 'speed') {
+      App.speed = App.speed === 1 ? 2 : App.speed === 2 ? 3 : 1;
+      Court.setSpeed(App.speed);
+      $('#speedBtn').textContent = App.speed + '×';
+      toast(`比赛速度 ${App.speed}×`);
+      return;
+    }
+  });
+
+  $('#modalRoot').addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-back')) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  /* ---------------- 启动 ---------------- */
+  function boot() {
+    loadSettings();
+    $('#soundBtn').textContent = Sound.enabled ? '🔊' : '🔇';
+    const saved = loadSave();
+    if (saved) {
+      $('#continueBtn').classList.remove('hidden');
+      $('#continueBtn').textContent = saved.seasonOver
+        ? `继续生涯 · 第 ${saved.season} 赛季总结`
+        : `继续生涯 · 第 ${saved.week}/${saved.maxWeek} 周`;
+    }
+    showScreen('title');
+    document.body.addEventListener('pointerdown', () => Sound.init(), { once: true });
+  }
+
+  boot();
+})();
+
+</script>
+</body>
+</html>
